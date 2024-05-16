@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/16 18:39:14 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/16 20:17:13 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,13 @@ Socket::~Socket(void)
 void    Socket::launch(void)
 {
     std::cout << WHITE << "Launching the server ..." << RESET << std::endl;
-    if (bind(this->_socket, reinterpret_cast<struct sockaddr *>(&this->_ipv4), sizeof(this->_ipv4)))
+	int status = bind(this->_socket, reinterpret_cast<struct sockaddr *>(&this->_ipv4), sizeof(this->_ipv4));
+	std::cout << status;
+    if (status)
+	{
+		std::cout << errno;
 		throw Error::Exception("Error: bind!");
+	}
     if (listen(this->_socket, 5))
 		throw Error::Exception("Error: listen!");
 }

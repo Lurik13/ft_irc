@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:45:54 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/16 18:33:20 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/16 20:11:10 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@
 #include <arpa/inet.h> // htonl()
 #include <netinet/in.h> // struct sockaddr_in
 #include <exception>
+#include <cstring>
+#include <errno.h>
 
 #define RESET "\e[0m"
 #define BLACK "\e[38;2;0;0;0;1m"
