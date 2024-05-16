@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:50:17 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/16 18:36:44 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/16 18:36:54 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class Socket
 		Socket(in_addr_t addr, in_port_t port, sa_family_t family);
 		~Socket(void);
 		void				launch(void);
-		//getter
+		void				handleClient(void);
 		int					getSocket(void);
 
 };

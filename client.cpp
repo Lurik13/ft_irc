@@ -27,6 +27,7 @@ int main(void)
     while (line != "exit")
     {
         std::getline(std::cin, line);
-        send(clientSocket, )
+        send(clientSocket, line.c_str(), sizeof(line), 0);
     }
+    close(clientSocket);
 }

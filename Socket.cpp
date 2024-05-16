@@ -19,7 +19,7 @@ Socket::Socket(in_addr_t addr, in_port_t port, sa_family_t family)
 	this->_ipv4.sin_addr.s_addr = addr;
 	this->_ipv4.sin_family = family;
 	this->_ipv4.sin_port = port;
-    _socket = socket(AF_INET, SOCK_STREAM, 0);
+    _socket = socket(family, SOCK_STREAM, 0);
     if (_socket < 0)
         throw Error::Exception("Error: socket!");
 }
@@ -38,14 +38,22 @@ void    Socket::launch(void)
 		throw Error::Exception("Error: bind!");
     if (listen(this->_socket, 5))
 		throw Error::Exception("Error: listen!");
+}
 
-    // this->_clientSocket = accept(this->_socket, NULL, NULL);
-	// if (this->_clientSocket < 0)
-	// 	throw Error::Exception("Error: cannot to connect a client!");
-    // std::cout << BLUE << "Client connected!" << RESET << std::endl;
-	// char buffer[2048];
-	// recv(this->_clientSocket, buffer, sizeof(buffer), 0);
-	// std::cout << "Message from client: " << buffer << std::endl;
+void	Socket::handleClient(void)
+{
+	this->_clientSocket = accept(this->_socket, NULL, NULL);
+	if (this->_clientSocket < 0)
+		throw Error::Exception("Error: cannot to connect a client!");
+    std::cout << BLUE << "Client connected!" << RESET << std::endl;
+	char buffer[2048] = {0};
+	memset(buffer, '\0', 2048);
+	while(recv(this->_clientSocket, buffer, 2048, 0) > 0)
+	{
+		std::cout << "Message from client: " << buffer << std::endl;
+		memset(buffer, '\0', 2048);
+	}
+	std::cout << "FINISHED !" << std::endl;
 }
 
 int	Socket::getSocket(void)

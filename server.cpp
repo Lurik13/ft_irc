@@ -21,8 +21,9 @@ int main(int argc, char **argv)
 	{
 		if (argc != 3)
 			throw Error::Exception("Error : Syntax!\n./ircserv <port> <password>");
-		Socket  server(inet_addr("10.18.190.220"), htons(8080), AF_INET);
+		Socket  server(inet_addr("10.18.190.220"), htons(8080), PF_INET);
 		server.launch();
+		server.handleClient();
 	}
 	catch(const std::exception& e)
 	{
