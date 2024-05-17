@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:45:59 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/16 20:15:11 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/17 11:48:14 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,28 @@
 #include "server.hpp"
 #include "Socket.hpp"
 
+void verif_command(int argc, char *port, char *password)
+{
+	if (argc != 3)
+		throw Error::Exception("Syntax error!\n./ircserv <port> <password>");
+	for (int i = 0; port[i]; i++)
+	{
+		if (!isdigit(port[i]) && !(i == 0))
+			throw Error::Exception("Error: The port must be an integer!");
+		if (i >= 4)
+			throw Error::Exception("Error: Invalid port!");
+	}
+	if (std::atoi(port) < 0 || std::atoi(port) > 32767)
+		throw Error::Exception("Error: Out of range port!");
+	if ((std::string)password != PASSWORD)
+		throw Error::Exception("Error: Invalid password!");
+}
+
 int main(int argc, char **argv)
 {
-	(void)argv;
 	try
 	{
-		if (argc != 3)
-			throw Error::Exception("Error : Syntax!\n./ircserv <port> <password>");
+		verif_command(argc, argv[1], argv[2]);
 		Socket  server(INADDR_ANY, htons(8080), PF_INET);
 		server.launch();
 		server.handleClient();
