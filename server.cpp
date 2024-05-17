@@ -20,7 +20,7 @@ void verif_command(int argc, char *port, char *password)
 		throw Error::Exception("Syntax error!\n./ircserv <port> <password>");
 	for (int i = 0; port[i]; i++)
 	{
-		if (!isdigit(port[i]) && !(i == 0))
+		if (!(isdigit(port[i]) || (i == 0 && port[i] == '-' && port[i + 1])))
 			throw Error::Exception("Error: The port must be an integer!");
 		if (i >= 4)
 			throw Error::Exception("Error: Invalid port!");
