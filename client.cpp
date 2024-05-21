@@ -25,7 +25,7 @@ int main(void)
 	connect(clientSocket, reinterpret_cast<struct sockaddr *>(&serverAddress), sizeof(serverAddress));
     std::cout << "Connected to the server!" << std::endl;
 
-    send(clientSocket, "CAP LS", 6, 0);
+    send(clientSocket, "CAP LS 302", 10, 0);
     // while (line != "exit")
     // {
     //     std::getline(std::cin, line);
