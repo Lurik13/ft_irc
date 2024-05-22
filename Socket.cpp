@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/16 20:17:13 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/22 10:26:37 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,24 @@ void    Socket::launch(void)
 		throw Error::Exception("Error: listen!");
 }
 
+std::string to_string(int n)
+{
+	std::string str = "";
+
+	if (n < 0)
+	{
+		str += "-";
+		n = -n;
+	}
+	while (n)
+	{
+		int x = n % 10;
+		n /= 10;
+		str += '0' + x;
+	}
+	return (str);
+}
+
 void sendHttpResponse(int clientSocket) {
     const char *htmlContent = "<!DOCTYPE html><html><head><title>Example Page</title></head><body><h1>Hello, World!</h1></body></html>";
     size_t contentLength = strlen(htmlContent);
@@ -54,7 +72,7 @@ void sendHttpResponse(int clientSocket) {
         "HTTP/1.1 200 OK\r\n"
         "Date: Tue, 21 May 2024 10:00:00 GMT\r\n"
         "Content-Type: text/html; charset=UTF-8\r\n"
-        "Content-Length: " + std::to_string(contentLength) + "\r\n"
+        "Content-Length: " + to_string(contentLength) + "\r\n"
         "\r\n" + htmlContent;
 
     // Envoyer la réponse HTTP
