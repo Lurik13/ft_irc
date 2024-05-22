@@ -22,12 +22,19 @@ Socket::Socket(in_addr_t addr, in_port_t port, sa_family_t family)
     this->_socket = socket(family, SOCK_STREAM, 0);
     if (this->_socket < 0)
         throw Error::Exception("Error: socket!");
+	pollfd	fd;
+	fd.fd = this->_socket;
+	fd.events = POLLIN;
+	fd.revents = 0;
+	this->_fds.push_back(fd);
 }
 
 Socket::~Socket(void)
 {
 	std::cout << YELLOW << "Shutting down the server." << RESET << std::endl;
-	close(this->_clientSocket);
+	for (unsigned long int i = 0; i < this->_fds.size(); i++)
+		close(this->_fds[i].fd);
+	// close(this->_clientSocket);
 	close(this->_socket);
 }
 
@@ -88,21 +95,72 @@ void sendHttpResponse(int clientSocket) {
     send(clientSocket, response.c_str(), response.length(), 0);
 }
 
-void	Socket::handleClient(void)
+void	Socket::acceptClient(void)
 {
-	this->_clientSocket = accept(this->_socket, NULL, NULL);
-	if (this->_clientSocket < 0)
-		throw Error::Exception("Error: cannot to connect a client!");
-    std::cout << BLUE << "Client connected!" << RESET << std::endl;
-	char buffer[65000] = {0};
-	memset(buffer, '\0', 65000);
-	while(recv(this->_clientSocket, buffer, 65000, 0) > 0)
+	pollfd	fd;
+	fd.fd = accept(this->_socket, NULL, NULL);
+	fd.events = POLLIN;
+	fd.revents = 0;
+	if (fd.fd < 0)
 	{
-		std::cout << "Message from client: " << buffer << std::endl;
-		memset(buffer, '\0', 65000);
-		sendHttpResponse(this->_clientSocket);
+		Socket::~Socket();
+		throw Error::Exception("Error: cannot to connect a client!");
 	}
-	std::cout << "FINISHED !" << std::endl;
+	this->_fds.push_back(fd);
+	std::cout << BLUE << "Client connected!" << RESET << std::endl;
+
+	// this->_clientSocket = accept(this->_socket, NULL, NULL);
+	// if (this->_clientSocket < 0)
+	// 	throw Error::Exception("Error: cannot to connect a client!");
+    // std::cout << BLUE << "Client connected!" << RESET << std::endl;
+	// char buffer[65000] = {0};
+	// memset(buffer, '\0', 65000);
+	// while(recv(this->_clientSocket, buffer, 65000, 0) > 0)
+	// {
+	// 	std::cout << "Message from client: " << buffer << std::endl;
+	// 	memset(buffer, '\0', 65000);
+	// 	sendHttpResponse(this->_clientSocket);
+	// }
+	// std::cout << "FINISHED !" << std::endl;
+}
+
+void	Socket::handle(void)
+{
+	int	status;
+	while (1)
+	{
+		status = poll(this->_fds.data(), this->_fds.size(), -1);
+		if (status < 0)
+		{
+			Socket::~Socket();
+			throw Error::Exception("Error: poll!");
+		}
+		if (status == 0)
+			continue;
+		for (unsigned long int i = 0; i < this->_fds.size(); i++)
+		{
+			if ((this->_fds[i].revents & POLLIN) != 1)
+				continue;
+			if (i == 0)
+			{
+				this->acceptClient();
+			}
+			else
+			{
+				char buffer[65000] = {0};
+				memset(buffer, '\0', 65000);
+				while(recv(this->_fds[i].fd, buffer, 65000, 0) > 0)
+				{
+					std::cout << "Message from client: " << buffer << std::endl;
+					memset(buffer, '\0', 65000);
+					sendHttpResponse(this->_fds[i].fd);
+				}
+				std::cout << "FINISHED !" << std::endl;
+				close(this->_fds[i].fd);
+				this->_fds.erase(this->_fds.begin() + i);
+			}
+		}
+	}
 }
 
 int	Socket::getSocket(void)

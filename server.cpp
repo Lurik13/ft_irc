@@ -36,9 +36,9 @@ int main(int argc, char **argv)
 	try
 	{
 		verif_command(argc, argv[1], argv[2]);
-		Socket  server(INADDR_ANY, htons(8080), PF_INET);
+		Socket  server(inet_addr("192.168.1.35"), htons(8080), PF_INET);
 		server.launch();
-		server.handleClient();
+		server.handle();
 	}
 	catch(const std::exception& e)
 	{

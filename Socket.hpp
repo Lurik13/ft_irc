@@ -18,15 +18,16 @@
 class Socket
 {
 	private:
-		struct sockaddr_in  _ipv4;
-        int                 _socket;
-		int					_clientSocket;
+		struct sockaddr_in 			_ipv4;
+        int                 		_socket;
+		std::vector<struct pollfd>	_fds;
 	public:
         Socket(void);
 		Socket(in_addr_t addr, in_port_t port, sa_family_t family);
 		~Socket(void);
 		void				launch(void);
-		void				handleClient(void);
+		void				acceptClient(void);
+		void				handle(void);
 		int					getSocket(void);
 
 };
