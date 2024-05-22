@@ -45,34 +45,43 @@ void    Socket::launch(void)
 		throw Error::Exception("Error: listen!");
 }
 
-std::string to_string(int n)
+static void	putnbr_chr(std::string s, size_t nb)
 {
-	std::string str = "";
+	size_t			n;
 
+	n = nb;
 	if (n < 0)
 	{
-		str += "-";
-		n = -n;
+		n = n * -1;
+		s += '-';
 	}
-	while (n)
+	if (n >= 10)
 	{
-		int x = n % 10;
-		n /= 10;
-		str += '0' + x;
+		putnbr_chr(s, n / 10);
+		putnbr_chr(s, n % 10);
 	}
-	return (str);
+	else
+		s += n + '0';
+}
+
+std::string	ft_itoa(int n)
+{
+	std::string	s = "";
+;
+	putnbr_chr(s, n);
+	s = "103";
+	return (s);
 }
 
 void sendHttpResponse(int clientSocket) {
     const char *htmlContent = "<!DOCTYPE html><html><head><title>Example Page</title></head><body><h1>Hello, World!</h1></body></html>";
-    size_t contentLength = strlen(htmlContent);
 
     // Construire la réponse HTTP
     std::string response =
         "HTTP/1.1 200 OK\r\n"
         "Date: Tue, 21 May 2024 10:00:00 GMT\r\n"
         "Content-Type: text/html; charset=UTF-8\r\n"
-        "Content-Length: " + to_string(contentLength) + "\r\n"
+        "Content-Length: " + ft_itoa(strlen(htmlContent)) + "\r\n"
         "\r\n" + htmlContent;
 
     // Envoyer la réponse HTTP
