@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <poll.h>
 #include <vector>
+#include <map>
 #include <algorithm>
 
 #define RESET "\e[0m"
