@@ -22,7 +22,6 @@
 #include <exception>
 #include <cstring>
 #include <cstdlib>
-#include <errno.h>
 #include <poll.h>
 #include <vector>
 #include <algorithm>

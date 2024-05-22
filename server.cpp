@@ -44,5 +44,6 @@ int main(int argc, char **argv)
 	{
 		std::cerr << RED << e.what() << RESET << std::endl;
 	}
+	std::cout << WHITE << "Server closed." << RESET << std::endl;
     return (0);
 }
