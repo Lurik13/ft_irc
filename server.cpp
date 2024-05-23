@@ -35,9 +35,13 @@ int main(int argc, char **argv)
 {
 	try
 	{
+		// check command
 		verif_command(argc, argv[1], argv[2]);
+		// init server class
 		Socket  server(inet_addr("192.168.1.35"), htons(8080), PF_INET);
+		// launch server
 		server.launch();
+		// handle server
 		server.handle();
 	}
 	catch(const std::exception& e)
