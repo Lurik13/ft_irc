@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 		// check command
 		verif_command(argc, argv[1], argv[2]);
 		// init server class
-		Socket  server(inet_addr("192.168.1.35"), htons(8080), PF_INET);
+		Socket  server(INADDR_ANY, htons(8080), PF_INET);
 		// launch server
 		server.launch();
 		// handle server

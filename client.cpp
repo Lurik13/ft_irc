@@ -20,7 +20,7 @@ int main(void)
 
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_port = htons(8080);
-	serverAddress.sin_addr.s_addr = inet_addr("192.168.1.35");
+	serverAddress.sin_addr.s_addr = INADDR_ANY;
 
 	connect(clientSocket, reinterpret_cast<struct sockaddr *>(&serverAddress), sizeof(serverAddress));
     std::cout << "Connected to the server!" << std::endl;
