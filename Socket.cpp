@@ -158,7 +158,7 @@ void	Socket::handle(void)
 				// si nous en tant que client on doit envoyer des choses ou c'est deja automatique fin bref
 				// AH SI!! J'ai teste avec un ft_irc enfaite on a rien a faire nous client, c'est le serveur qui doit envoyer des reponses pour que le client puisse se connecter (s'enregistrer sur le serveur) MAIS BON comme tu vois, ca marche pas avec ces trucs la
 				// Il manque des messages de bienvenues sans doute
-				// Bon faut pas oublier que il faudra parser pour que ca soit fonctionnel avec n'importe quel machine client parce que tout le monde ne s'apelle pas toto et tout le monde n'a pas la meme ip
+				// Bon faut pas oublier que il faudra parser pour que ca soit fonctionnel avec n'importe quel machine client parce que tout le monde ne s'apelle pas toto et tout le monde n'a pas la meme ip.
 				//
 			}
 		}
