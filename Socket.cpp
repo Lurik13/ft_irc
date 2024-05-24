@@ -145,6 +145,21 @@ void	Socket::handle(void)
 				}
 				else
 					std::cout << str << ": " << buffer << std::endl;
+				send(this->_fds[i].fd, "toto :Welcome to the 192.168.1.35 Network, toto[!toto@192.168.1.35]\r\n", 72, 0);
+				// <client> = 127.0.0.1
+				// NON, client tu verras quand tut vas te connecter, ca sera pas 127.0.0.1, ca sera autre chose, faut lancer pour voir ton ip DE LA MACHINE CLIENT
+				send(this->_fds[i].fd, "toto :Your host is 192.168.1.35 running version 1.0\r\n", 57, 0);
+				send(this->_fds[i].fd, "toto :This server was created 2024/05/22 10:26:37\r\n", 57, 0);
+				send(this->_fds[i].fd, "toto :There are 1 users and 0 services on 1 servers\r\n", 57, 0);
+				send(this->_fds[i].fd, "toto :0 operator(s) online\r\n", 27, 0);
+				send(this->_fds[i].fd, "toto :0 unknown connection(s)\r\n", 32, 0);
+				// REGARDE ICI
+				// Voila voila ce que j'ai essaye de faire un peu mais bon je ompreds pas trop comment tout ca ca fonctionne
+				// si nous en tant que client on doit envoyer des choses ou c'est deja automatique fin bref
+				// AH SI!! J'ai teste avec un ft_irc enfaite on a rien a faire nous client, c'est le serveur qui doit envoyer des reponses pour que le client puisse se connecter (s'enregistrer sur le serveur) MAIS BON comme tu vois, ca marche pas avec ces trucs la
+				// Il manque des messages de bienvenues sans doute
+				// Bon faut pas oublier que il faudra parser pour que ca soit fonctionnel avec n'importe quel machine client parce que tout le monde ne s'apelle pas toto et tout le monde n'a pas la meme ip
+				//
 			}
 		}
 	}
