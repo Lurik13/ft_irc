@@ -14,7 +14,7 @@
 #include "server.hpp"
 #include "Socket.hpp"
 
-void verif_command(int argc, char *port, char *password)
+void verif_command(int argc, char *port)
 {
 	if (argc != 3)
 		throw Error::Exception("Syntax error!\n./ircserv <port> <password>");
@@ -27,8 +27,6 @@ void verif_command(int argc, char *port, char *password)
 	}
 	if (std::atoi(port) < 0 || std::atoi(port) > 32767)
 		throw Error::Exception("Error: Out of range port!");
-	if ((std::string)password != PASSWORD)
-		throw Error::Exception("Error: Invalid password!");
 }
 
 int main(int argc, char **argv)
@@ -36,9 +34,9 @@ int main(int argc, char **argv)
 	try
 	{
 		// check command
-		verif_command(argc, argv[1], argv[2]);
+		verif_command(argc, argv[1]);
 		// init server class
-		Socket  server(inet_addr("127.0.0.1"), htons(8080), AF_INET);
+		Socket  server(INADDR_ANY, htons(std::atoi(argv[1])), AF_INET, argv[2]);
 		// launch server
 		server.launch();
 		// handle server

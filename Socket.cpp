@@ -14,7 +14,7 @@
 
 Socket::Socket(void) {}
 
-Socket::Socket(in_addr_t addr, in_port_t port, sa_family_t family)
+Socket::Socket(in_addr_t addr, in_port_t port, sa_family_t family, std::string password)
 {
 	pollfd	fd;
 
@@ -23,6 +23,7 @@ Socket::Socket(in_addr_t addr, in_port_t port, sa_family_t family)
 	this->_ipv4.sin_addr.s_addr = addr;
 	this->_ipv4.sin_family = family;
 	this->_ipv4.sin_port = port;
+	this->_password = password;
 	// creation of the socket (socket is a file descriptor)
 	// pollfd configuration structure for multiple non-blocking file descriptors
     fd.fd = socket(family, SOCK_STREAM, 0);
@@ -31,7 +32,7 @@ Socket::Socket(in_addr_t addr, in_port_t port, sa_family_t family)
     if (fd.fd < 0)
     {
         throw Error::Exception("Error: socket!");
-	}	
+	}
 	this->_fds.push_back(fd);
 	this->_clients[fd.fd] = this->_ipv4;
 	// ---- ( TEMPORAIRE ) fd2 : stdin ----
@@ -87,11 +88,24 @@ void	Socket::acceptClient(void)
 	std::cout << BLUE << str << " connected!" << RESET << std::endl;
 }
 
+bool	Socket::registration(int fd, bool is_first)
+{
+	if (is_first == true)
+	{
+		send(fd, "001 bonsoir :Welcome to the ft_irc.com Network, bonsoir[!bonsoir@192.168.1.35]\r\n", 74, 0);
+		send(fd, "003 bonsoir :This server was created 2024/05/25 10:26:37\r\n", 58, 0);
+		send(fd, "002 bonsoir :Your host is ft_irc.com, running version 1.0\r\n", 59, 0);
+		send(fd, "004 bonsoir :There are 1 users and 0 services on 1 servers\r\n", 60, 0);
+		is_first = false;
+	}
+	return (is_first);
+}
+
 void	Socket::handle(void)
 {
 	int		status = 0;
 	bool	running = true;
-	bool	sendReply = true;
+	bool	is_first = true;
 
 	while (running)
 	{
@@ -147,15 +161,16 @@ void	Socket::handle(void)
 					this->_fds.erase(this->_fds.begin() + i);
 				}
 				else
-					std::cout << str << ": " << buffer << std::endl;
-				if (sendReply == true)
 				{
-					send(this->_fds[i].fd, "001 bonsoir :Welcome to the ft_irc.com Network, toto[!toto@192.168.1.35]\r\n", 74, 0);
-					send(this->_fds[i].fd, "002 bonsoir :Your host is ft_irc.com, running version 1.0\r\n", 59, 0);
-					send(this->_fds[i].fd, "003 bonsoir :This server was created 2024/05/22 10:26:37\r\n", 58, 0);
-					send(this->_fds[i].fd, "004 bonsoir :There are 1 users and 0 services on 1 servers\r\n", 60, 0);
-					sendReply = false;
+					std::string	str(buffer);
+
+					// PARSER
+					// EXECUTER LES COMMANDES
+					std::cout << "buffer ↓\n";
+					std::cout << str << ": " << buffer << std::endl;
+					std::cout << "buffer ↑\n";
 				}
+				is_first = this->registration(this->_fds[i].fd, is_first);
 				// send(this->_fds[i].fd, "0 operator(s) online\r\n", 27, 0);
 				// send(this->_fds[i].fd, "0 unknown connection(s)\r\n", 32, 0);
 

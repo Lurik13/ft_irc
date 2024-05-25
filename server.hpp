@@ -36,5 +36,3 @@
 #define MAGENTA "\e[38;2;255;0;255;1m"
 #define CYAN "\e[38;2;0;255;255;1m"
 #define WHITE "\e[38;2;255;255;255;1m"
-
-#define PASSWORD "test"
