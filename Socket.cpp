@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/22 10:26:37 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/25 12:11:11 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ void	Socket::handle(void)
 {
 	int		status = 0;
 	bool	running = true;
+	bool	sendReply = true;
 
 	while (running)
 	{
@@ -147,14 +148,18 @@ void	Socket::handle(void)
 				}
 				else
 					std::cout << str << ": " << buffer << std::endl;
-				send(this->_fds[i].fd, "toto :Welcome to the 192.168.1.35 Network, toto[!toto@192.168.1.35]\r\n", 72, 0);
-				// <client> = 127.0.0.1
-				// NON, client tu verras quand tut vas te connecter, ca sera pas 127.0.0.1, ca sera autre chose, faut lancer pour voir ton ip DE LA MACHINE CLIENT
-				send(this->_fds[i].fd, "toto :Your host is 192.168.1.35 running version 1.0\r\n", 57, 0);
-				send(this->_fds[i].fd, "toto :This server was created 2024/05/22 10:26:37\r\n", 57, 0);
-				send(this->_fds[i].fd, "toto :There are 1 users and 0 services on 1 servers\r\n", 57, 0);
-				send(this->_fds[i].fd, "toto :0 operator(s) online\r\n", 27, 0);
-				send(this->_fds[i].fd, "toto :0 unknown connection(s)\r\n", 32, 0);
+				if (sendReply == true)
+				{
+					send(this->_fds[i].fd, "001 bonsoir :Welcome to the ft_irc.com Network, toto[!toto@192.168.1.35]\r\n", 74, 0);
+					send(this->_fds[i].fd, "002 bonsoir :Your host is ft_irc.com, running version 1.0\r\n", 59, 0);
+					send(this->_fds[i].fd, "003 bonsoir :This server was created 2024/05/22 10:26:37\r\n", 58, 0);
+					send(this->_fds[i].fd, "004 bonsoir :There are 1 users and 0 services on 1 servers\r\n", 60, 0);
+					sendReply = false;
+				}
+				// send(this->_fds[i].fd, "0 operator(s) online\r\n", 27, 0);
+				// send(this->_fds[i].fd, "0 unknown connection(s)\r\n", 32, 0);
+
+				
 				// REGARDE ICI
 				// Voila voila ce que j'ai essaye de faire un peu mais bon je ompreds pas trop comment tout ca ca fonctionne
 				// si nous en tant que client on doit envoyer des choses ou c'est deja automatique fin bref
