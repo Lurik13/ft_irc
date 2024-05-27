@@ -1,0 +1,26 @@
+Les differentes manieres possible d'écrire un perfix:
+    - :server.example.com
+    - :nickname
+    - :nickname!username@hostname
+
+Les differentes manières d'écrire une commande avec/sans arguments:
+    - JOIN #channel
+    - NOTICE #channel :This is a notice.
+    - :server.example.com NOTICE * :Server is going down for maintenance
+
+
+Le parsing :
+    :nickname!username@hostname PRIVMSG #channel :Hello everyone!"
+
+    prefix : :nickname!username@hostname
+    command : PRIVMSG
+    arguments[0] : #channel
+    arguments[1] : Hello everyone!
+
+    -----------
+
+    MODE nickname +i
+
+    command : MODE
+    arguments[0] : nickname
+    arguments[1] : +i
