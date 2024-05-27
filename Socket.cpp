@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/25 12:11:11 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/27 15:16:26 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,9 @@ void    Socket::launch(void)
 {
     std::cout << WHITE << "Launching the server..." << RESET << std::endl;
 	// bind the socket to the address and port
+	int opt = 1;
+	if (setsockopt(this->_fds[0].fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+			throw Error::Exception("Error: setsockopt!");
 	int status = bind(this->_fds[0].fd, reinterpret_cast<struct sockaddr *>(&this->_ipv4), sizeof(this->_ipv4));
     if (status)
 		throw Error::Exception("Error: bind!");
@@ -162,7 +165,7 @@ void	Socket::handle(void)
 				}
 				else
 				{
-					std::string	str(buffer);
+					// std::string	str(buffer);
 
 					// PARSER
 					// EXECUTER LES COMMANDES
