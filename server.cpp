@@ -51,6 +51,8 @@ int main(int argc, char **argv)
 	// std::cout << WHITE << "Server closed." << RESET << std::endl;
 
 	Parse parse;
-	parse.parse("    :test  dsadsadas   ");
+	std::string to_parse = ":a!b@c PRIVMSG #test :coucou les amis";
+	// std::cout << "\"" << to_parse << "\"\n";
+	parse.parse(to_parse);
     return (0);
 }
