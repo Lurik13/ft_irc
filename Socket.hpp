@@ -14,6 +14,7 @@
 
 #include "server.hpp"
 #include "Error.hpp"
+#include "Parse.hpp"
 
 class Socket
 {
