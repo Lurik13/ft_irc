@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/27 15:16:26 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/28 10:28:24 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,17 +91,65 @@ void	Socket::acceptClient(void)
 	std::cout << BLUE << str << " connected!" << RESET << std::endl;
 }
 
-bool	Socket::registration(int fd, bool is_first)
+bool	Socket::registration(struct pollfd& fd, bool is_first)
 {
 	if (is_first == true)
 	{
-		send(fd, "001 bonsoir :Welcome to the ft_irc.com Network, bonsoir[!bonsoir@192.168.1.35]\r\n", 74, 0);
-		send(fd, "003 bonsoir :This server was created 2024/05/25 10:26:37\r\n", 58, 0);
-		send(fd, "002 bonsoir :Your host is ft_irc.com, running version 1.0\r\n", 59, 0);
-		send(fd, "004 bonsoir :There are 1 users and 0 services on 1 servers\r\n", 60, 0);
+		send(fd.fd, "001 bonsoir :Welcome to the ft_irc.com Network, bonsoir[!bonsoir@192.168.1.35]\r\n", 74, 0);
+		send(fd.fd, "002 bonsoir :Your host is ft_irc.com, running version 1.0\r\n", 59, 0);
+		send(fd.fd, "003 bonsoir :This server was created 2024/05/25 10:26:37\r\n", 58, 0);
+		send(fd.fd, "004 bonsoir :There are 1 users and 0 services on 1 servers\r\n", 60, 0);
 		is_first = false;
 	}
 	return (is_first);
+}
+
+bool	Socket::readStdin(void)
+{
+	char buffer[65000] = {0};
+
+	memset(buffer, '\0', 65000);
+	read(0, buffer, sizeof(buffer));
+	if (strcmp(buffer, "exit\n") == 0)
+		return (false);
+	return (true);
+}
+
+// Définir l'opérateur d'égalité pour la structure pollfd
+bool operator==(const pollfd& lhs, const pollfd& rhs) {
+    return lhs.fd == rhs.fd && lhs.events == rhs.events && lhs.revents == rhs.revents;
+}
+
+void	Socket::readClientSocket(struct pollfd& fd)
+{
+	char	buffer[65000] = {0};
+	int		bytes = 0;
+	// inet_ntop converts the network address to a string
+	char	str[INET_ADDRSTRLEN];
+
+	inet_ntop(AF_INET, &this->_clients[fd.fd].sin_addr.s_addr, str, sizeof(str));
+	memset(buffer, '\0', 65000);
+	// recv receives a message from the client
+	bytes = recv(fd.fd, buffer, 65000, 0);
+	if (bytes <= 0)
+	{
+		if (bytes == 0)
+			std::cout << BLUE << str << " disconnected!" << RESET << std::endl;
+		else
+			std::cout << "Error: recv!" << std::endl;
+		// close the client file descriptor and remove it from the map and vector
+		this->_clients.erase(fd.fd);
+		close(fd.fd);
+		std::vector<struct pollfd>::iterator it = std::find(this->_fds.begin(), this->_fds.end(), fd);
+		this->_fds.erase(it);
+	}
+	else
+		std::cout << str << ": " << buffer << std::endl;
+
+	// PARSING -----------------------------------------------------------------------------------------------------------------------------------
+
+	// send(this->_fds[i].fd, "0 operator(s) online\r\n", 27, 0);
+	// send(this->_fds[i].fd, "0 unknown connection(s)\r\n", 32, 0);
 }
 
 void	Socket::handle(void)
@@ -129,62 +177,13 @@ void	Socket::handle(void)
 			// ---- ( TEMPORAIRE ) i == 1 : fd stdin ----
 			// if i == 1, the standard input has been modified (is ready to read)
 			else if (i == 1)
-			{
-				char buffer[65000] = {0};
-				memset(buffer, '\0', 65000);
-				read(0, buffer, sizeof(buffer));
-				if (strcmp(buffer, "exit\n") == 0)
-				{
-					running = false;
-					break ;
-				}
-			}
+				running = this->readStdin();
 			// -------------------------------------------
 			// i > 1 : fd client has been modified
 			else
 			{
-				char	buffer[65000] = {0};
-				int		bytes = 0;
-				// inet_ntop converts the network address to a string
-				char	str[INET_ADDRSTRLEN];
-
-				inet_ntop(AF_INET, &this->_clients[this->_fds[i].fd].sin_addr.s_addr, str, sizeof(str));
-				memset(buffer, '\0', 65000);
-				// recv receives a message from the client
-				bytes = recv(this->_fds[i].fd, buffer, 65000, 0);
-				if (bytes <= 0)
-				{
-					if (bytes == 0)
-						std::cout << BLUE << str << " disconnected!" << RESET << std::endl;
-					else
-						std::cout << "Error: recv!" << std::endl;
-					// close the client file descriptor and remove it from the map and vector
-					this->_clients.erase(this->_fds[i].fd);
-					close(this->_fds[i].fd);
-					this->_fds.erase(this->_fds.begin() + i);
-				}
-				else
-				{
-					// std::string	str(buffer);
-
-					// PARSER
-					// EXECUTER LES COMMANDES
-					std::cout << "buffer ↓\n";
-					std::cout << str << ": " << buffer << std::endl;
-					std::cout << "buffer ↑\n";
-				}
-				is_first = this->registration(this->_fds[i].fd, is_first);
-				// send(this->_fds[i].fd, "0 operator(s) online\r\n", 27, 0);
-				// send(this->_fds[i].fd, "0 unknown connection(s)\r\n", 32, 0);
-
-				
-				// REGARDE ICI
-				// Voila voila ce que j'ai essaye de faire un peu mais bon je ompreds pas trop comment tout ca ca fonctionne
-				// si nous en tant que client on doit envoyer des choses ou c'est deja automatique fin bref
-				// AH SI!! J'ai teste avec un ft_irc enfaite on a rien a faire nous client, c'est le serveur qui doit envoyer des reponses pour que le client puisse se connecter (s'enregistrer sur le serveur) MAIS BON comme tu vois, ca marche pas avec ces trucs la
-				// Il manque des messages de bienvenues sans doute
-				// Bon faut pas oublier que il faudra parser pour que ca soit fonctionnel avec n'importe quel machine client parce que tout le monde ne s'apelle pas toto et tout le monde n'a pas la meme ip.
-				//
+				this->readClientSocket(this->_fds[i]);
+				is_first = this->registration(this->_fds[i], is_first);
 			}
 		}
 	}

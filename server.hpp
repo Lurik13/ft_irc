@@ -26,6 +26,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <sstream>
 
 #define RESET "\e[0m"
 #define BLACK "\e[38;2;0;0;0;1m"

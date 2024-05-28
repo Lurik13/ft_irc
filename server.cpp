@@ -31,21 +31,28 @@ void verif_command(int argc, char *port)
 
 int main(int argc, char **argv)
 {
-	try
-	{
-		// check command
-		verif_command(argc, argv[1]);
-		// init server class
-		Socket  server(INADDR_ANY, htons(std::atoi(argv[1])), AF_INET, argv[2]);
-		// launch server
-		server.launch();
-		// handle server
-		server.handle();
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << RED << e.what() << RESET << std::endl;
-	}
-	std::cout << WHITE << "Server closed." << RESET << std::endl;
+	(void)argc;
+	(void)argv;
+	// try
+	// {
+	// 	// check command
+	// 	verif_command(argc, argv[1]);
+	// 	// init server class
+	// 	Socket  server(INADDR_ANY, htons(std::atoi(argv[1])), AF_INET, argv[2]);
+	// 	// launch server
+	// 	server.launch();
+	// 	// handle server
+	// 	server.handle();
+	// }
+	// catch(const std::exception& e)
+	// {
+	// 	std::cerr << RED << e.what() << RESET << std::endl;
+	// }
+	// std::cout << WHITE << "Server closed." << RESET << std::endl;
+
+	Parse parse;
+	std::string to_parse = ":a!b@c PRIVMSG #test :coucou les amis";
+	// std::cout << "\"" << to_parse << "\"\n";
+	parse.parse(to_parse);
     return (0);
 }
