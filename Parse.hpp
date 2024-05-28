@@ -19,3 +19,5 @@ class Parse
 		~Parse();
 		void						parse(std::string msg);
 };
+
+std::string	substr_to_limiter(int *start, std::string prefix, char limiter);

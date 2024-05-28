@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:45:59 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/17 11:48:14 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/28 12:11:38 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,8 @@ int main(int argc, char **argv)
 	// std::cout << WHITE << "Server closed." << RESET << std::endl;
 
 	Parse parse;
-	std::string to_parse = ":a!b@c PRIVMSG #test :coucou les amis";
-	// std::cout << "\"" << to_parse << "\"\n";
+	std::string to_parse = ":Lurik13!lribette@LucaS PRIVMSG #test :coucou les amis";
+	std::cout << "to parse = \"\e[2m" << to_parse << "\e[0m\"\n";
 	parse.parse(to_parse);
     return (0);
 }

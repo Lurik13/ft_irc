@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:45:54 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/17 11:37:24 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/28 11:27:34 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 #include <map>
 #include <algorithm>
 #include <sstream>
+#include <string>
 
 #define RESET "\e[0m"
 #define BLACK "\e[38;2;0;0;0;1m"
