@@ -34,7 +34,10 @@ Socket::Socket(in_addr_t addr, in_port_t port, sa_family_t family, std::string p
         throw Error::Exception("Error: socket!");
 	}
 	this->_fds.push_back(fd);
-	this->_clients[fd.fd] = this->_ipv4;
+	this->_clients[fd.fd].ipv4 = this->_ipv4;
+	this->_clients[fd.fd].nickname = "";
+	this->_clients[fd.fd].username = "";
+	this->_clients[fd.fd].hostname = "";
 	// ---- ( TEMPORAIRE ) fd2 : stdin ----
 	pollfd	fd2;
 	fd2.fd = 0;
@@ -48,7 +51,7 @@ Socket::~Socket(void)
 {
 	std::cout << YELLOW << "Shutting down the server." << RESET << std::endl;
 	// close all clients
-	for (std::map<int, sockaddr_in>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
+	for (std::map<int, infoClient>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
 		close(it->first);
 }
 
@@ -85,7 +88,10 @@ void	Socket::acceptClient(void)
 	if (fd.fd < 0)
 		throw Error::Exception("Error: cannot to connect the client!");
 	this->_fds.push_back(fd);
-	this->_clients[fd.fd] = csin;
+	this->_clients[fd.fd].ipv4 = csin;
+	this->_clients[fd.fd].nickname = "";
+	this->_clients[fd.fd].username = "";
+	this->_clients[fd.fd].hostname = "";
 	// inet_ntop converts the network address to a string
 	inet_ntop(AF_INET, &csin.sin_addr.s_addr, str, sizeof(str));
 	std::cout << BLUE << str << " connected!" << RESET << std::endl;
@@ -120,14 +126,14 @@ bool operator==(const pollfd& lhs, const pollfd& rhs) {
     return lhs.fd == rhs.fd && lhs.events == rhs.events && lhs.revents == rhs.revents;
 }
 
-void	Socket::readClientSocket(struct pollfd& fd)
+std::string	Socket::readClientSocket(struct pollfd& fd)
 {
 	char	buffer[65000] = {0};
 	int		bytes = 0;
 	// inet_ntop converts the network address to a string
 	char	str[INET_ADDRSTRLEN];
 
-	inet_ntop(AF_INET, &this->_clients[fd.fd].sin_addr.s_addr, str, sizeof(str));
+	inet_ntop(AF_INET, &this->_clients[fd.fd].ipv4.sin_addr.s_addr, str, sizeof(str));
 	memset(buffer, '\0', 65000);
 	// recv receives a message from the client
 	bytes = recv(fd.fd, buffer, 65000, 0);
@@ -143,13 +149,37 @@ void	Socket::readClientSocket(struct pollfd& fd)
 		std::vector<struct pollfd>::iterator it = std::find(this->_fds.begin(), this->_fds.end(), fd);
 		this->_fds.erase(it);
 	}
-	else
-		std::cout << str << ": " << buffer << std::endl;
-
+	// else
+	// 	std::cout << str << ": " << buffer << std::endl;
+	return (buffer);
 	// PARSING -----------------------------------------------------------------------------------------------------------------------------------
 
 	// send(this->_fds[i].fd, "0 operator(s) online\r\n", 27, 0);
 	// send(this->_fds[i].fd, "0 unknown connection(s)\r\n", 32, 0);
+}
+
+void	Socket::parseClientInfos(std::string buffer, struct pollfd& fd)
+{
+	// APPELER LA FONCTION DE PARSING ICI
+	Parse		parsing;
+	std::string	lines = buffer;
+	std::string	line;
+
+	unsigned long int	start = 0;
+	unsigned long int	end = 0;
+
+	while (end != std::string::npos)
+	{
+		end = lines.find("\r\n", start);
+		line = lines.substr(start, end - start);
+		if (!line.empty())
+			std::cout << "line = " << line << std::endl;
+		parsing.parse(line);
+		start = end + 2;
+	}
+	this->_clients[fd.fd].username = parsing
+	// end = lines.find("\r\n", start);
+	// line = lines.substr(start, end - start);
 }
 
 void	Socket::handle(void)
@@ -182,7 +212,8 @@ void	Socket::handle(void)
 			// i > 1 : fd client has been modified
 			else
 			{
-				this->readClientSocket(this->_fds[i]);
+				std::string	buffer = this->readClientSocket(this->_fds[i]);
+				this->parseClientInfos(buffer, this->_fds[i]);
 				is_first = this->registration(this->_fds[i], is_first);
 			}
 		}

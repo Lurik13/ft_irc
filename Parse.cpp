@@ -1,6 +1,9 @@
 #include "Parse.hpp"
 
-Parse::Parse() : _server(""), _nickname(""), _username(""), _hostname(""), _prefix(""), _cmd("") {}
+Parse::Parse() : _server(""), _nickname(""), _username(""), _hostname(""), _prefix(""), _cmd("")
+{
+	_args.clear();
+}
 
 Parse::~Parse() {}
 
@@ -15,6 +18,10 @@ void    Parse::parse(std::string msg)
 	std::istringstream  stream(msg);
 	std::string         token;
 
+	// REINITIALISER LES ATTRIBUTS A 0 ENTRE CHAQUE APPEL DE LA FONCTION
+	= 0
+	= 0
+	= 0
 	// PREFIX
 	stream >> std::ws;
 	if (stream.peek() == ':')
@@ -24,8 +31,8 @@ void    Parse::parse(std::string msg)
 	}
 
 	// CMD
-	stream >> token;
-	this->_cmd = token;
+	if (stream >> token)
+		this->_cmd = token;
 
 	// ARGS
 	while (stream >> token)
@@ -46,8 +53,8 @@ void    Parse::parse(std::string msg)
 	std::cout << "cmd = " << this->_cmd << std::endl;
 	std::cout << "args = " << std::endl;
 	if (!this->_args.empty())
-		for (int i = 0; this->_args[i].c_str(); i++)
-			std::cout << " - " << this->_args[i].c_str() << std::endl;
+		for (unsigned long int i = 0; i < this->_args.size(); i++)
+			std::cout << " - " << this->_args[i] << std::endl;
 	std::cout << "prefix = " << this->_prefix << std::endl;
     this->prefix();
 }
@@ -69,17 +76,15 @@ std::string	substr_to_limiter(int *start, std::string prefix, char limiter)
 void	Parse::prefix(void)
 {
     if (this->_prefix.empty())
-	{
         return ;
-	}
 	int start = 0;
 	this->_nickname = substr_to_limiter(&start, this->_prefix, '!');
 	this->_username = substr_to_limiter(&start, this->_prefix, '@');
 	this->_hostname = substr_to_limiter(&start, this->_prefix, ' ');
-	std::cout 
+	std::cout
 	<< "nickname = " << this->_nickname << std::endl
 	<< "username = " << this->_username << std::endl
 	<< "hostname = " << this->_hostname << std::endl;
 }
 
-// :nickname!username@hostname
+// :nickname!username@hostname CMD arg1 arg2 arg3 :arg4 arg4 arg4
