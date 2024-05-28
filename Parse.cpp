@@ -46,8 +46,8 @@ void    Parse::parse(std::string msg)
 	std::cout << "cmd = " << this->_cmd << std::endl;
 	std::cout << "args = " << std::endl;
 	if (!this->_args.empty())
-		for (int i = 0; this->_args[i].c_str(); i++)
-			std::cout << " - " << this->_args[i].c_str() << std::endl;
+		for (unsigned long i = 0; i < this->_args.size(); i++)
+			std::cout << " - " << this->_args.at(i) << std::endl;
 	std::cout << "prefix = " << this->_prefix << std::endl;
     this->prefix();
 }
