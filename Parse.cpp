@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Parse.cpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/28 21:17:04 by lribette          #+#    #+#             */
+/*   Updated: 2024/05/28 21:17:04 by lribette         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Parse.hpp"
 
 Parse::Parse() : _server(""), _nickname(""), _username(""), _hostname(""), _prefix(""), _cmd("")
@@ -6,6 +18,11 @@ Parse::Parse() : _server(""), _nickname(""), _username(""), _hostname(""), _pref
 }
 
 Parse::~Parse() {}
+
+std::string	Parse::getServer(void) {return this->_server;}
+std::string	Parse::getNickname(void) {return this->_nickname;}
+std::string	Parse::getUsername(void) {return this->_username;}
+std::string	Parse::getHostname(void) {return this->_hostname;}
 
 std::string Parse::pcharToString(char *pchar)
 {
@@ -19,9 +36,14 @@ void    Parse::parse(std::string msg)
 	std::string         token;
 
 	// REINITIALISER LES ATTRIBUTS A 0 ENTRE CHAQUE APPEL DE LA FONCTION
-	= 0
-	= 0
-	= 0
+	this->_server = "";
+	this->_nickname = "";
+	this->_username = "";
+	this->_hostname = "";
+	this->_prefix = "";
+	this->_cmd = "";
+	this->_args.clear();
+
 	// PREFIX
 	stream >> std::ws;
 	if (stream.peek() == ':')
@@ -76,7 +98,9 @@ std::string	substr_to_limiter(int *start, std::string prefix, char limiter)
 void	Parse::prefix(void)
 {
     if (this->_prefix.empty())
+	{
         return ;
+	}
 	int start = 0;
 	this->_nickname = substr_to_limiter(&start, this->_prefix, '!');
 	this->_username = substr_to_limiter(&start, this->_prefix, '@');

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Parse.hpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/28 21:17:53 by lribette          #+#    #+#             */
+/*   Updated: 2024/05/28 21:17:53 by lribette         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #pragma once
 
 #include "server.hpp"
@@ -17,6 +29,10 @@ class Parse
 	public:
 		Parse();
 		~Parse();
+		std::string					getServer(void);
+		std::string					getNickname(void);
+		std::string					getUsername(void);
+		std::string					getHostname(void);
 		void						parse(std::string msg);
 };
 

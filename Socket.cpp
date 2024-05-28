@@ -175,9 +175,19 @@ void	Socket::parseClientInfos(std::string buffer, struct pollfd& fd)
 		if (!line.empty())
 			std::cout << "line = " << line << std::endl;
 		parsing.parse(line);
+		if (!parsing.getNickname().empty())
+			this->_clients[fd.fd].nickname = parsing.getNickname();
+		if (!parsing.getUsername().empty())
+			this->_clients[fd.fd].username = parsing.getUsername();
+		if (!parsing.getHostname().empty())
+			this->_clients[fd.fd].hostname = parsing.getHostname();
 		start = end + 2;
 	}
-	this->_clients[fd.fd].username = parsing
+
+	std::cout << "\e[38;2;255;0;0m"
+	<< "nickname = " << this->_clients[fd.fd].nickname << std::endl
+	<< "username = " << this->_clients[fd.fd].username << std::endl
+	<< "hostname = " << this->_clients[fd.fd].hostname << std::endl << "\e[0m";
 	// end = lines.find("\r\n", start);
 	// line = lines.substr(start, end - start);
 }
