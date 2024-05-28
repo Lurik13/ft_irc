@@ -31,28 +31,29 @@ void verif_command(int argc, char *port)
 
 int main(int argc, char **argv)
 {
-	(void)argc;
-	(void)argv;
-	// try
-	// {
-	// 	// check command
-	// 	verif_command(argc, argv[1]);
-	// 	// init server class
-	// 	Socket  server(INADDR_ANY, htons(std::atoi(argv[1])), AF_INET, argv[2]);
-	// 	// launch server
-	// 	server.launch();
-	// 	// handle server
-	// 	server.handle();
-	// }
-	// catch(const std::exception& e)
-	// {
-	// 	std::cerr << RED << e.what() << RESET << std::endl;
-	// }
-	// std::cout << WHITE << "Server closed." << RESET << std::endl;
+	// (void)argc;
+	// (void)argv;
+	try
+	{
+		// check command
+		verif_command(argc, argv[1]);
+		// init server class
+		Socket  server(INADDR_ANY, htons(std::atoi(argv[1])), AF_INET, argv[2]);
+		// launch server
+		server.launch();
+		// handle server
+		server.handle();
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << RED << e.what() << RESET << std::endl;
+	}
+	std::cout << WHITE << "Server closed." << RESET << std::endl;
 
-	Parse parse;
-	std::string to_parse = ":Lurik13!lribette@LucaS PRIVMSG #test :coucou les amis";
-	std::cout << "to parse = \"\e[2m" << to_parse << "\e[0m\"\n";
-	parse.parse(to_parse);
+	// Parse parse;
+	// std::string to_parse = ":Lurik13!lribette@LucaS PRIVMSG #test :coucou les amis";
+	// std::cout << "to parse = \"\e[2m" << to_parse << "\e[0m\"\n";
+	// parse.parse(to_parse);
+
     return (0);
 }

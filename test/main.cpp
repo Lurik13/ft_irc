@@ -59,12 +59,21 @@ typedef struct pollfd  pollfd;
 // // DESOLE JE DOIS ALLER CHERCHER MON FRERE A LECOLE  JARRIVE !!!!!!
 // // je vais en profiter pour aller manger alors okokokokokok
 
+#include <map>
+
 int main(void)
 {
-    std::vector<int> s;
+    std::map<std::string, int>  numbers;
 
-    s.push_back(1);
-    s.push_back(2);
-    std::cout << s[0] << std::endl;
+    numbers["one"] = 1;
+    numbers["two"] = 2;
+    numbers["three"] = 3;
+    numbers["four"] = 4;
+    numbers["five"] = 5;
+    std::cout << "numbers[\"one\"] = " << numbers["one"] << std::endl;
+    std::cout << "numbers[\"two\"] = " << numbers["two"] << std::endl;
+    std::cout << "numbers[\"three\"] = " << numbers["three"] << std::endl;
+    std::cout << "numbers[\"four\"] = " << numbers["four"] << std::endl;
+    std::cout << "numbers[\"five\"] = " << numbers["five"] << std::endl;
     return (0);
 }
