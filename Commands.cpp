@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   commands.cpp                                       :+:      :+:    :+:   */
+/*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/29 11:31:56 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/29 17:21:01 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd)
 
 void    which_command(Parse& parse, Socket& socket, struct pollfd& fd)
 {
-	void    (*fxptr[])() = {&pass(parse, socket, fd)};
+	void    (*fxptr[])(Parse &, Socket &, pollfd &) = {pass};
 	std::string cmdptr[] = {"PASS"};
 
 	int     i = 0;
@@ -44,7 +44,7 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd)
 		}
 		i++;
 	}
-	(this->*fxptr[i])();
+	(*fxptr[i])(parse, socket, fd);
 }
 
 // CAP, NICK, USER, QUIT, PING, PONG, WHOIS, PASS, JOIN, "WHO", "PART", "LUSERS", "MOTD", "PRIVMSG"

@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/28 10:28:24 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/29 17:22:01 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,7 +182,7 @@ void	Socket::parseClientInfos(std::string buffer, struct pollfd& fd)
 		line = lines.substr(start, end - start);
 		if (!line.empty())
 			std::cout << "line = " << line << std::endl;
-		which_command(parsing.parse(line), *this, fd);
+		// which_command(parsing.parse(line), *this, fd);
 		// FORET DE IF CMD == JOIN, NICK, USER, QUIT, PING, PONG, PRIVMSG, NOTICE, MOTD, LUSERS, VERSION, STATS, LINKS, TIME, CONNECT, TRACE, ADMIN, INFO, SERVLIST, SQUERY, WHO, WHOIS, WHOWAS, KILL, PING, PONG, ERROR, AWAY, REHASH, DIE, RESTART, SUMMON, USERS, WALLOPS, USERHOST, ISON
 		// if (!parsing.getNickname().empty())
 		// 	this->_clients[fd.fd].nickname = parsing.getNickname();
