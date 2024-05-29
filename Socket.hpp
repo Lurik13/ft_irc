@@ -22,6 +22,7 @@ typedef struct infoClient
 	std::string		nickname;
 	std::string		username;
 	std::string		hostname;
+	std::string		password;
 	// std::string		channel;
 }				infoClient;
 
@@ -40,6 +41,8 @@ class Socket
 	public:
 		Socket(in_addr_t addr, in_port_t port, sa_family_t family, std::string password);
 		~Socket(void);
+		std::string					getPassword(void);
+		void						ft_erase(int fd);
 		void						launch(void);
 		void						acceptClient(void);
 		void						handle(void);

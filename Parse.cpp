@@ -23,6 +23,8 @@ std::string	Parse::getServer(void) {return this->_server;}
 std::string	Parse::getNickname(void) {return this->_nickname;}
 std::string	Parse::getUsername(void) {return this->_username;}
 std::string	Parse::getHostname(void) {return this->_hostname;}
+std::string	Parse::getCmd(void) {return this->_cmd;}
+std::vector<std::string> Parse::getArgs(void) {return this->_args;}
 
 std::string Parse::pcharToString(char *pchar)
 {
@@ -30,7 +32,7 @@ std::string Parse::pcharToString(char *pchar)
 	return (str);
 }
 
-void    Parse::parse(std::string msg)
+Parse&	Parse::parse(std::string msg)
 {
 	std::istringstream  stream(msg);
 	std::string         token;
@@ -72,13 +74,14 @@ void    Parse::parse(std::string msg)
 			this->_args.push_back(token);
 	}
 
-	std::cout << "cmd = " << this->_cmd << std::endl;
+	std::cout << "cmd = " << "|" << this->_cmd << "|" << std::endl;
 	std::cout << "args = " << std::endl;
 	if (!this->_args.empty())
 		for (unsigned long i = 0; i < this->_args.size(); i++)
-			std::cout << " - " << this->_args.at(i) << std::endl;
-	std::cout << "prefix = " << this->_prefix << std::endl;
+			std::cout << " - " << "|" << this->_args.at(i) << "|" << std::endl;
+	std::cout << "prefix = " << "|" << this->_prefix << "|" << std::endl;
     this->prefix();
+	return (*this);
 }
 
 std::string	substr_to_limiter(int *start, std::string prefix, char limiter)
@@ -106,9 +109,9 @@ void	Parse::prefix(void)
 	this->_username = substr_to_limiter(&start, this->_prefix, '@');
 	this->_hostname = substr_to_limiter(&start, this->_prefix, ' ');
 	std::cout
-	<< "nickname = " << this->_nickname << std::endl
-	<< "username = " << this->_username << std::endl
-	<< "hostname = " << this->_hostname << std::endl;
+	<< "nickname = " << "|" << this->_nickname << "|" << std::endl
+	<< "username = " << "|" << this->_username << "|" << std::endl
+	<< "hostname = " << "|" << this->_hostname << "|" << std::endl;
 }
 
 // :nickname!username@hostname CMD arg1 arg2 arg3 :arg4 arg4 arg4

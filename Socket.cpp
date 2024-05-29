@@ -11,6 +11,18 @@
 /* ************************************************************************** */
 
 #include "Socket.hpp"
+#include "Commands.hpp"
+
+std::string	Socket::getPassword() {return this->_password;}
+
+void	Socket::ft_erase(int fd)
+{
+	// std::vector<struct pollfd>::iterator	it = std::find(this->_fds.begin(), this->_fds.end(), fd);
+
+	this->_clients.erase(fd);
+	// this->_fds.erase(it);
+	close(fd);
+}
 
 Socket::Socket(void) {}
 
@@ -92,6 +104,7 @@ void	Socket::acceptClient(void)
 	this->_clients[fd.fd].nickname = "";
 	this->_clients[fd.fd].username = "";
 	this->_clients[fd.fd].hostname = "";
+	this->_clients[fd.fd].password = "";
 	// inet_ntop converts the network address to a string
 	inet_ntop(AF_INET, &csin.sin_addr.s_addr, str, sizeof(str));
 	std::cout << BLUE << str << " connected!" << RESET << std::endl;
@@ -149,18 +162,13 @@ std::string	Socket::readClientSocket(struct pollfd& fd)
 		std::vector<struct pollfd>::iterator it = std::find(this->_fds.begin(), this->_fds.end(), fd);
 		this->_fds.erase(it);
 	}
-	// else
-	// 	std::cout << str << ": " << buffer << std::endl;
+	else
+		std::cout << str << ": " << buffer << std::endl;
 	return (buffer);
-	// PARSING -----------------------------------------------------------------------------------------------------------------------------------
-
-	// send(this->_fds[i].fd, "0 operator(s) online\r\n", 27, 0);
-	// send(this->_fds[i].fd, "0 unknown connection(s)\r\n", 32, 0);
 }
 
 void	Socket::parseClientInfos(std::string buffer, struct pollfd& fd)
 {
-	// APPELER LA FONCTION DE PARSING ICI
 	Parse		parsing;
 	std::string	lines = buffer;
 	std::string	line;
@@ -174,22 +182,21 @@ void	Socket::parseClientInfos(std::string buffer, struct pollfd& fd)
 		line = lines.substr(start, end - start);
 		if (!line.empty())
 			std::cout << "line = " << line << std::endl;
-		parsing.parse(line);
-		if (!parsing.getNickname().empty())
-			this->_clients[fd.fd].nickname = parsing.getNickname();
-		if (!parsing.getUsername().empty())
-			this->_clients[fd.fd].username = parsing.getUsername();
-		if (!parsing.getHostname().empty())
-			this->_clients[fd.fd].hostname = parsing.getHostname();
+		which_command(parsing.parse(line), *this, fd);
+		// FORET DE IF CMD == JOIN, NICK, USER, QUIT, PING, PONG, PRIVMSG, NOTICE, MOTD, LUSERS, VERSION, STATS, LINKS, TIME, CONNECT, TRACE, ADMIN, INFO, SERVLIST, SQUERY, WHO, WHOIS, WHOWAS, KILL, PING, PONG, ERROR, AWAY, REHASH, DIE, RESTART, SUMMON, USERS, WALLOPS, USERHOST, ISON
+		// if (!parsing.getNickname().empty())
+		// 	this->_clients[fd.fd].nickname = parsing.getNickname();
+		// if (!parsing.getUsername().empty())
+		// 	this->_clients[fd.fd].username = parsing.getUsername();
+		// if (!parsing.getHostname().empty())
+		// 	this->_clients[fd.fd].hostname = parsing.getHostname();
 		start = end + 2;
 	}
 
-	std::cout << "\e[38;2;255;0;0m"
-	<< "nickname = " << this->_clients[fd.fd].nickname << std::endl
-	<< "username = " << this->_clients[fd.fd].username << std::endl
-	<< "hostname = " << this->_clients[fd.fd].hostname << std::endl << "\e[0m";
-	// end = lines.find("\r\n", start);
-	// line = lines.substr(start, end - start);
+	std::cout << RED
+	<< "nickname = " << "|" << this->_clients[fd.fd].nickname << "|" << std::endl
+	<< "username = " << "|" << this->_clients[fd.fd].username << "|" << std::endl
+	<< "hostname = " << "|" << this->_clients[fd.fd].hostname << "|" << std::endl << RESET << std::endl;
 }
 
 void	Socket::handle(void)

@@ -33,7 +33,9 @@ class Parse
 		std::string					getNickname(void);
 		std::string					getUsername(void);
 		std::string					getHostname(void);
-		void						parse(std::string msg);
+		std::string					getCmd(void);
+		std::vector<std::string>	getArgs(void);
+		Parse&						parse(std::string msg);
 };
 
 std::string	substr_to_limiter(int *start, std::string prefix, char limiter);
