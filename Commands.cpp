@@ -55,8 +55,8 @@ void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	{
 		clients[fd.fd].username = parse.getArgs().at(0);
 		clients[fd.fd].hostname = parse.getArgs().at(1);
-		// clients[fd.fd].servername = parse.getArgs().at(2);
-		// clients[fd.fd].realname = parse.getArgs().at(3);
+		clients[fd.fd].servername = parse.getArgs().at(2);
+		clients[fd.fd].realname = parse.getArgs().at(3);
 	}
 }
 

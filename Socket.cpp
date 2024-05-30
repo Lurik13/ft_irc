@@ -25,8 +25,9 @@ void	Socket::ft_erase(struct pollfd& fd)
 	std::vector<struct pollfd>::iterator	it = std::find(this->_fds.begin(), this->_fds.end(), fd);
 
 	this->_clients.erase(fd.fd);
-	this->_fds.erase(it);
 	close(fd.fd);
+	this->_fds.erase(it);
+	std::cout << BLUE << fd.fd << " disconnected!" << RESET << std::endl;
 }
 
 Socket::Socket(void) {}
@@ -93,8 +94,6 @@ void	Socket::acceptClient(void)
 	// csin is the client's address
 	sockaddr_in	csin;
 	socklen_t	csin_len = sizeof(csin);
-	// str is the client's address in string format
-	char		str[INET_ADDRSTRLEN];
 
 	memset(&fd, 0, sizeof(fd));
 	memset(&csin, 0, sizeof(csin));
@@ -110,22 +109,21 @@ void	Socket::acceptClient(void)
 	this->_clients[fd.fd].username = "";
 	this->_clients[fd.fd].hostname = "";
 	this->_clients[fd.fd].password = "";
-	// inet_ntop converts the network address to a string
-	inet_ntop(AF_INET, &csin.sin_addr.s_addr, str, sizeof(str));
-	std::cout << BLUE << str << " connected!" << RESET << std::endl;
+	this->_clients[fd.fd].is_first = 1;
+	std::cout << BLUE << fd.fd << " connected!" << RESET << std::endl;
 }
 
-bool	Socket::registration(struct pollfd& fd, bool is_first)
+infoClient	Socket::registration(struct pollfd& fd, infoClient& client)
 {
-	if (is_first == true)
+	if (client.is_first == true)
 	{
 		send(fd.fd, "001 bonsoir :Welcome to the ft_irc.com Network, bonsoir[!bonsoir@192.168.1.35]\r\n", 74, 0);
 		send(fd.fd, "002 bonsoir :Your host is ft_irc.com, running version 1.0\r\n", 59, 0);
 		send(fd.fd, "003 bonsoir :This server was created 2024/05/25 10:26:37\r\n", 58, 0);
 		send(fd.fd, "004 bonsoir :There are 1 users and 0 services on 1 servers\r\n", 60, 0);
-		is_first = false;
+		client.is_first = false;
 	}
-	return (is_first);
+	return (client);
 }
 
 bool	Socket::readStdin(void)
@@ -152,15 +150,14 @@ std::string	Socket::readClientSocket(struct pollfd& fd)
 	bytes = recv(fd.fd, buffer, 65000, 0);
 	if (bytes <= 0)
 	{
-		if (bytes == 0)
-			std::cout << BLUE << str << " disconnected!" << RESET << std::endl;
-		else
+		if (bytes != 0)
 			std::cout << "Error: recv!" << std::endl;
 		// close the client file descriptor and remove it from the map and vector
-		this->_clients.erase(fd.fd);
-		close(fd.fd);
-		std::vector<struct pollfd>::iterator it = std::find(this->_fds.begin(), this->_fds.end(), fd);
-		this->_fds.erase(it);
+		// this->_clients.erase(fd.fd);
+		// close(fd.fd);
+		// std::vector<struct pollfd>::iterator it = std::find(this->_fds.begin(), this->_fds.end(), fd);
+		// this->_fds.erase(it);
+		ft_erase(fd);
 	}
 	else
 		std::cout << str << ": " << buffer << std::endl;
@@ -180,9 +177,12 @@ void	Socket::parseClientInfos(std::string buffer, struct pollfd& fd)
 	{
 		end = lines.find("\r\n", start);
 		line = lines.substr(start, end - start);
-		if (!line.empty())
-			std::cout << "line = " << line << std::endl;
-		which_command(parsing.parse(line), *this, fd, this->_clients);
+		if (this->_clients.find(fd.fd) != this->_clients.end())
+		{
+			if (!line.empty())
+				std::cout << "line = " << line << std::endl;
+			which_command(parsing.parse(line), *this, fd, this->_clients);
+		}
 		// FORET DE IF CMD == JOIN, NICK, USER, QUIT, PING, PONG, PRIVMSG, NOTICE, MOTD, LUSERS, VERSION, STATS, LINKS, TIME, CONNECT, TRACE, ADMIN, INFO, SERVLIST, SQUERY, WHO, WHOIS, WHOWAS, KILL, PING, PONG, ERROR, AWAY, REHASH, DIE, RESTART, SUMMON, USERS, WALLOPS, USERHOST, ISON
 		// if (!parsing.getNickname().empty())
 		// 	this->_clients[fd.fd].nickname = parsing.getNickname();
@@ -203,7 +203,6 @@ void	Socket::handle(void)
 {
 	int		status = 0;
 	bool	running = true;
-	bool	is_first = true;
 
 	while (running)
 	{
@@ -231,7 +230,7 @@ void	Socket::handle(void)
 			{
 				std::string	buffer = this->readClientSocket(this->_fds[i]);
 				this->parseClientInfos(buffer, this->_fds[i]);
-				is_first = this->registration(this->_fds[i], is_first);
+				this->_clients[this->_fds[i].fd] = this->registration(this->_fds[i], this->_clients[this->_fds[i].fd]);
 			}
 		}
 	}

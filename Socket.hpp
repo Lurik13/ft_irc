@@ -19,10 +19,13 @@
 typedef struct infoClient
 {
 	struct sockaddr_in	ipv4;
+	std::string		password;
 	std::string		nickname;
 	std::string		username;
+	std::string		servername;
+	std::string		realname;
 	std::string		hostname;
-	std::string		password;
+	bool			is_first;
 	// std::string		channel;
 }				infoClient;
 
@@ -34,7 +37,7 @@ class Socket
 		std::map<int, infoClient>	_clients;
 		std::string					_password;
         Socket(void);
-		bool						registration(struct pollfd& fd, bool is_first);
+		infoClient					registration(struct pollfd& fd, infoClient& client);
 		bool						readStdin(void);
 		std::string					readClientSocket(struct pollfd& fd);
 		void						parseClientInfos(std::string buffer, struct pollfd& fd);
