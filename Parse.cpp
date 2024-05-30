@@ -73,13 +73,6 @@ Parse&	Parse::parse(std::string msg)
 		else
 			this->_args.push_back(token);
 	}
-
-	std::cout << "cmd = " << "|" << this->_cmd << "|" << std::endl;
-	std::cout << "args = " << std::endl;
-	if (!this->_args.empty())
-		for (unsigned long i = 0; i < this->_args.size(); i++)
-			std::cout << " - " << "|" << this->_args.at(i) << "|" << std::endl;
-	std::cout << "prefix = " << "|" << this->_prefix << "|" << std::endl;
     this->prefix();
 	return (*this);
 }
@@ -108,10 +101,6 @@ void	Parse::prefix(void)
 	this->_nickname = substr_to_limiter(&start, this->_prefix, '!');
 	this->_username = substr_to_limiter(&start, this->_prefix, '@');
 	this->_hostname = substr_to_limiter(&start, this->_prefix, ' ');
-	std::cout
-	<< "nickname = " << "|" << this->_nickname << "|" << std::endl
-	<< "username = " << "|" << this->_username << "|" << std::endl
-	<< "hostname = " << "|" << this->_hostname << "|" << std::endl;
 }
 
 // :nickname!username@hostname CMD arg1 arg2 arg3 :arg4 arg4 arg4
