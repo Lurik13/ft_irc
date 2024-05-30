@@ -12,9 +12,10 @@
 
 #include "Commands.hpp"
 
-void	pass(Parse& parse, Socket& socket, struct pollfd& fd)
+void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
 {
 	int error = 0;
+
 	if (parse.getArgs().size() != 1)
 	{
 		send(fd.fd, "Usage: /PASS <password>\r\n", 26, 0);
@@ -26,25 +27,55 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd)
 		error = 1;
 	}
 	if (error == 1)
-		socket.ft_erase(fd.fd);
+		socket.ft_erase(fd);
+	(void)clients;
 }
 
-void    which_command(Parse& parse, Socket& socket, struct pollfd& fd)
+void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
 {
-	void    (*fxptr[])(Parse &, Socket &, pollfd &) = {pass};
-	std::string cmdptr[] = {"PASS"};
+	if (parse.getArgs().size() != 1)
+	{
+		send(fd.fd, "Usage: /NICK <nickname>\r\n", 26, 0);
+		socket.ft_erase(fd);
+	}
+	else
+	{
+		clients[fd.fd].nickname = parse.getArgs().at(0);
+	}
+}
 
-	int     i = 0;
+void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+{
+	if (parse.getArgs().size() != 4)
+	{
+		send(fd.fd, "Usage: /USER <username> <hostname> <servername> <realname>\r\n", 61, 0);
+		socket.ft_erase(fd);
+	}
+	else
+	{
+		clients[fd.fd].username = parse.getArgs().at(0);
+		clients[fd.fd].hostname = parse.getArgs().at(1);
+		// clients[fd.fd].servername = parse.getArgs().at(2);
+		// clients[fd.fd].realname = parse.getArgs().at(3);
+	}
+}
+
+void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+{
+	int			i = 0;
+	std::string	cmdptr[] = {"PASS", "NICK", "USER"};
+	void		(*fxptr[])(Parse&, Socket&, struct pollfd&, std::map<int, infoClient>&) = {pass, nick, user};
+
 	while (parse.getCmd() != cmdptr[i])
 	{
-		if (i == 1)
+		if (i == 3)
 		{
 			std::cout << "Command not found!\r\n";
 			return;
 		}
 		i++;
 	}
-	(*fxptr[i])(parse, socket, fd);
+	(*fxptr[i])(parse, socket, fd, clients);
 }
 
 // CAP, NICK, USER, QUIT, PING, PONG, WHOIS, PASS, JOIN, "WHO", "PART", "LUSERS", "MOTD", "PRIVMSG"

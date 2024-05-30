@@ -16,5 +16,7 @@
 #include "Socket.hpp"
 #include "Parse.hpp"
 
-void	pass(Parse& parse, Socket& socket, struct pollfd& fd);
-void    which_command(Parse& parse, Socket& socket, struct pollfd& fd);
+void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients);
+void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients);
+void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients);
+void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients);

@@ -42,7 +42,7 @@ class Socket
 		Socket(in_addr_t addr, in_port_t port, sa_family_t family, std::string password);
 		~Socket(void);
 		std::string					getPassword(void);
-		void						ft_erase(int fd);
+		void						ft_erase(struct pollfd& fd);
 		void						launch(void);
 		void						acceptClient(void);
 		void						handle(void);

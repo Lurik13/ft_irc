@@ -13,15 +13,20 @@
 #include "Socket.hpp"
 #include "Commands.hpp"
 
+// Définir l'opérateur d'égalité pour la structure pollfd
+bool operator==(const pollfd& lhs, const pollfd& rhs) {
+    return lhs.fd == rhs.fd && lhs.events == rhs.events && lhs.revents == rhs.revents;
+}
+
 std::string	Socket::getPassword() {return this->_password;}
 
-void	Socket::ft_erase(int fd)
+void	Socket::ft_erase(struct pollfd& fd)
 {
-	// std::vector<struct pollfd>::iterator	it = std::find(this->_fds.begin(), this->_fds.end(), fd);
+	std::vector<struct pollfd>::iterator	it = std::find(this->_fds.begin(), this->_fds.end(), fd);
 
-	this->_clients.erase(fd);
-	// this->_fds.erase(it);
-	close(fd);
+	this->_clients.erase(fd.fd);
+	this->_fds.erase(it);
+	close(fd.fd);
 }
 
 Socket::Socket(void) {}
@@ -134,11 +139,6 @@ bool	Socket::readStdin(void)
 	return (true);
 }
 
-// Définir l'opérateur d'égalité pour la structure pollfd
-bool operator==(const pollfd& lhs, const pollfd& rhs) {
-    return lhs.fd == rhs.fd && lhs.events == rhs.events && lhs.revents == rhs.revents;
-}
-
 std::string	Socket::readClientSocket(struct pollfd& fd)
 {
 	char	buffer[65000] = {0};
@@ -182,7 +182,7 @@ void	Socket::parseClientInfos(std::string buffer, struct pollfd& fd)
 		line = lines.substr(start, end - start);
 		if (!line.empty())
 			std::cout << "line = " << line << std::endl;
-		// which_command(parsing.parse(line), *this, fd);
+		which_command(parsing.parse(line), *this, fd, this->_clients);
 		// FORET DE IF CMD == JOIN, NICK, USER, QUIT, PING, PONG, PRIVMSG, NOTICE, MOTD, LUSERS, VERSION, STATS, LINKS, TIME, CONNECT, TRACE, ADMIN, INFO, SERVLIST, SQUERY, WHO, WHOIS, WHOWAS, KILL, PING, PONG, ERROR, AWAY, REHASH, DIE, RESTART, SUMMON, USERS, WALLOPS, USERHOST, ISON
 		// if (!parsing.getNickname().empty())
 		// 	this->_clients[fd.fd].nickname = parsing.getNickname();
