@@ -37,7 +37,7 @@ class Socket
 		std::vector<struct pollfd>	_fds;
 		std::map<int, infoClient>	_clients;
 		std::string					_password;
-		std::vector<Channel>		_channels;
+		// std::vector<Channel>		_channels;
         Socket(void);
 		infoClient					registration(struct pollfd& fd, infoClient& client);
 		bool						readStdin(void);
