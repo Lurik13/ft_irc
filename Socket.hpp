@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:50:17 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/30 18:05:27 by marvin           ###   ########.fr       */
+/*   Updated: 2024/05/31 11:43:51 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ class Socket
 		std::vector<struct pollfd>	_fds;
 		std::map<int, infoClient>	_clients;
 		std::string					_password;
-		// std::vector<Channel>		_channels;
+		std::vector<class Channel>		_channels;
         Socket(void);
 		infoClient					registration(struct pollfd& fd, infoClient& client);
 		bool						readStdin(void);
