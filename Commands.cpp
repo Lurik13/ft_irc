@@ -15,10 +15,16 @@
 void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
 {
 	(void)clients;
-	if (parse.getArgs().size() < 1 && send(fd.fd, "Usage: /PASS <password>\r\n", 26, 0) < 0)
-		throw Error::Exception("Error: send!");
-	else if (parse.getArgs().at(0) != socket.getPassword() && send(fd.fd, "Invalid password!\r\n", 20, 0) < 0)
-		throw Error::Exception("Error: send!");
+	if (parse.getArgs().size() < 1)
+	{
+		if (send(fd.fd, "Usage: /PASS <password>\r\n", 26, 0) < 0)
+			throw Error::Exception("Error: send!");
+	}
+	else if (parse.getArgs().at(0) != socket.getPassword())
+	{
+		if (send(fd.fd, "Invalid password!\r\n", 20, 0) < 0)
+			throw Error::Exception("Error: send!");
+	}
 	else
 		socket.ft_erase(fd);
 }
@@ -84,18 +90,15 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
 {
-	int			i = 0;
-	std::string	cmdptr[] = {"PASS", "NICK", "USER, QUIT, PING"};
+	size_t		i = 0;
+	std::string	cmdptr[] = {"PASS", "NICK", "USER", "QUIT", "PING"};
 	void		(*fxptr[])(Parse&, Socket&, struct pollfd&, std::map<int, infoClient>&) = {pass, nick, user, quit, ping};
 
 	while (parse.getCmd() != cmdptr[i])
 	{
-		if (i == 4)
-		{
-			// std::cout << "Command not found!\r\n";
-			return;
-		}
 		i++;
+		if (i > cmdptr->size())
+			return ;
 	}
 	(*fxptr[i])(parse, socket, fd, clients);
 }

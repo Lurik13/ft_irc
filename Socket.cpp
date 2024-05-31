@@ -117,10 +117,10 @@ infoClient	Socket::registration(struct pollfd& fd, infoClient& client)
 {
 	if (client.is_first == true)
 	{
-		send(fd.fd, "001 bonsoir :Welcome to the ft_irc.com Network, bonsoir[!bonsoir@192.168.1.35]\r\n", 74, 0);
-		send(fd.fd, "002 bonsoir :Your host is ft_irc.com, running version 1.0\r\n", 59, 0);
-		send(fd.fd, "003 bonsoir :This server was created 2024/05/25 10:26:37\r\n", 58, 0);
-		send(fd.fd, "004 bonsoir :There are 1 users and 0 services on 1 servers\r\n", 60, 0);
+		send(fd.fd, "001 bonsoir :Welcome to the ft_irc.com Network, bonsoir[!bonsoir@192.168.1.35]\r\n", 81, 0);
+		send(fd.fd, "002 bonsoir :Your host is ft_irc.com, running version 1.0\r\n", 60, 0);
+		send(fd.fd, "003 bonsoir :This server was created 2024/05/25 10:26:37\r\n", 59, 0);
+		send(fd.fd, "004 bonsoir :There are 1 users and 0 services on 1 servers\r\n", 61, 0);
 		client.is_first = false;
 	}
 	return (client);
