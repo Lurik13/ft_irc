@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/31 10:43:33 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/31 16:53:57 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,10 +117,29 @@ infoClient	Socket::registration(struct pollfd& fd, infoClient& client)
 {
 	if (client.is_first == true)
 	{
-		send(fd.fd, "001 bonsoir :Welcome to the ft_irc.com Network, bonsoir[!bonsoir@192.168.1.35]\r\n", 74, 0);
-		send(fd.fd, "002 bonsoir :Your host is ft_irc.com, running version 1.0\r\n", 59, 0);
-		send(fd.fd, "003 bonsoir :This server was created 2024/05/25 10:26:37\r\n", 58, 0);
-		send(fd.fd, "004 bonsoir :There are 1 users and 0 services on 1 servers\r\n", 60, 0);
+		std::string server = "ft_irc.com";
+		std::string version = "1.0";
+		std::string datetime = "2024/05/25 10:26:37";
+
+		std::string bleu = "\e[38;2;0;120;170;1m";
+		// send(fd.fd, bleu.c_str(), bleu.size(), 0);
+		
+		std::string welcome = "001 " + client.nickname + " :Welcome to the " + server + " Network, " + client.nickname + "[!" + client.username + "@" + client.hostname + "]\r\n";
+		if (send(fd.fd, welcome.c_str(), welcome.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+		
+		std::string yourhost = "002 " + client.nickname + " :Your host is " + server + ", running version 1.0\r\n";
+		if (send(fd.fd, yourhost.c_str(), yourhost.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+		
+		std::string created = "003 " + client.nickname + " :This server was created " + datetime + "\r\n";
+		if (send(fd.fd, created.c_str(), created.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+		
+		std::string myinfo = "004 " + client.nickname + " :There are 1 users and 0 services on 1 servers (PENSER A MODIFIER)\r\n";
+		if (send(fd.fd, myinfo.c_str(), myinfo.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+	
 		client.is_first = false;
 	}
 	return (client);

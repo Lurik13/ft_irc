@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/31 11:34:22 by lribette         ###   ########.fr       */
+/*   Updated: 2024/05/31 17:00:20 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,37 @@
 void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
 {
 	(void)clients;
-	if (parse.getArgs().size() < 1 && send(fd.fd, "Usage: /PASS <password>\r\n", 26, 0) < 0)
-		throw Error::Exception("Error: send!");
-	else if (parse.getArgs().at(0) != socket.getPassword() && send(fd.fd, "Invalid password!\r\n", 20, 0) < 0)
-		throw Error::Exception("Error: send!");
-	else
+	int error = 0;
+
+	if (parse.getArgs().size() < 1)
+	{
+		if (send(fd.fd, "Usage: /PASS <password>\r\n", 26, 0) < 0)
+			throw Error::Exception("Error: send!");
+		error = 1;
+	}
+	
+	//On concatene tous les arguments au cas ou le serveur ait demande un mot de passe avec des espaces
+	std::string password = "";
+	for (unsigned long i = 0; i < parse.getArgs().size(); i++)
+	{
+		password += parse.getArgs().at(i);
+		if (i + 1 < parse.getArgs().size())
+			password += " ";
+	}
+	if (password != socket.getPassword())
+	{
+		if (send(fd.fd, "Invalid password!\r\n", 20, 0) < 0)
+			throw Error::Exception("Error: send!");
+		error = 1;
+	}
+	
+	if (error == 1)
 		socket.ft_erase(fd);
 }
 
 void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
 {
+	std::cout << "Je passe nick\n";
 	if (parse.getArgs().size() != 1)
 	{
 		if (send(fd.fd, "Usage: /NICK <nickname>\r\n", 26, 0) < 0)
@@ -39,6 +60,7 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
 {
+	std::cout << "Je passe user\n";
 	if (parse.getArgs().size() != 4)
 	{
 		send(fd.fd, "Usage: /USER <username> <hostname> <servername> <realname>\r\n", 61, 0);
@@ -68,16 +90,19 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	(void)parse;
 	(void)socket;
 	(void)clients;
+	std::cout << "Je passe ping\n";
 	if (parse.getArgs().size() == 1 || parse.getArgs().size() == 2)
 	{
-		std::string toSend = "PONG " + clients[fd.fd].servername + " :" + parse.getArgs().at(0) + "\r\n";
+		// std::string toSend = "PONG " + clients[fd.fd].servername + " :" + parse.getArgs().at(0) + "\r\n";
+		std::string toSend = "PONG " + parse.getArgs().at(0) + "\r\n";
 		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
 			throw Error::Exception("Error: send!");
+		std::cout << toSend;
 	}
 	else
 	{
 		std::string toSend = "PING :needs one param.\r\n";
-		if (send(461, toSend.c_str(), toSend.size(), 0) < 0)
+		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
 			throw Error::Exception("Error: send!");
 	}
 }
