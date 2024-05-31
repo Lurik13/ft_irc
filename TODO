@@ -1,4 +1,0 @@
-An IRC message is a single line, delimited by a pair of CR ('\r', 0x0D) and LF ('\n', 0x0A) characters.
-
-    When reading messages from a stream, read the incoming data into a buffer. Only parse and process a message once you encounter the \r\n at the end of it. If you encounter an empty message, silently ignore it.
-    When sending messages, ensure that a pair of \r\n characters follows every single message your software sends out.
