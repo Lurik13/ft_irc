@@ -12,9 +12,10 @@
 
 #include "Commands.hpp"
 
-void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
 	(void)clients;
+	(void)channel;
 	int error = 0;
 
 	if (parse.getArgs().size() < 1)
@@ -42,8 +43,9 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		socket.ft_erase(fd);
 }
 
-void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
+	(void)channel;
 	std::cout << "Je passe nick\n";
 	if (parse.getArgs().size() != 1)
 	{
@@ -57,8 +59,9 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 }
 
-void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
+	(void)channel;
 	std::cout << "Je passe user\n";
 	if (parse.getArgs().size() != 4)
 	{
@@ -75,20 +78,22 @@ void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 }
 
 // ----------------- A CORRIGER -----------------
-void	quit(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+void	quit(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
 	(void)parse;
 	(void)socket;
 	(void)clients;
 	(void)fd;
+	(void)channel;
 	// socket.ft_erase(fd);
 }
 
-void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
 	(void)parse;
 	(void)socket;
 	(void)clients;
+	(void)channel;
 	std::cout << "Je passe ping\n";
 	if (parse.getArgs().size() == 1 || parse.getArgs().size() == 2)
 	{
@@ -106,47 +111,37 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 }
 
-void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
+	(void)parse;
 	(void)socket;
-	std::cout << "Je passe join\n";
-	if (parse.getArgs().size() == 1)
+	(void)fd;
+	(void)clients;
+	(void)channel;
+	for (unsigned long i = 0; i < parse.getArgs().size(); i++)
 	{
-		std::string toSend = ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " JOIN " + parse.getArgs().at(0) + "\r\n";
-		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
-			throw Error::Exception("Error: send!");
-	}
-	else
-	{
-		std::string toSend = "JOIN :needs one param.\r\n";
-		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
-			throw Error::Exception("Error: send!");
+		std::cout << parse.getArgs().at(i) << std::endl;
+		if (i % 2)
+			std::cout << "PAIR" << std::endl;
+		else
+			std::cout << "IMPAIR" << std::endl;
 	}
 }
 
-void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
+	(void)parse;
 	(void)socket;
-	std::cout << "Je passe part" << std::endl;
-	if (parse.getArgs().size() == 1)
-	{
-		std::string toSend = ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PART " + parse.getArgs().at(0) + "\r\n";
-		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
-			throw Error::Exception("Error: send!");
-	}
-	else
-	{
-		std::string toSend = "PART :needs one param.\r\n";
-		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
-			throw Error::Exception("Error: send!");
-	}
+	(void)fd;
+	(void)clients;
+	(void)channel;
 }
 
-void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
 	size_t		i = 0;
 	std::string	cmdptr[] = {"PASS", "NICK", "USER", "QUIT", "PING", "JOIN", "PART"};
-	void		(*fxptr[])(Parse&, Socket&, struct pollfd&, std::map<int, infoClient>&) = {pass, nick, user, quit, ping, join, part};
+	void		(*fxptr[])(Parse&, Socket&, struct pollfd&, std::map<int, infoClient>&, std::vector<class Channel>&) = {pass, nick, user, quit, ping, join, part};
 
 	while (parse.getCmd() != cmdptr[i])
 	{
@@ -154,7 +149,7 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 		if (i > 5)
 			return ;
 	}
-	(*fxptr[i])(parse, socket, fd, clients);
+	(*fxptr[i])(parse, socket, fd, clients, channel);
 }
 
 // CAP, NICK, USER, QUIT, PING, WHOIS, PASS, JOIN, "WHO", "PART", "LUSERS", "MOTD", "PRIVMSG"

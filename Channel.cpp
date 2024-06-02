@@ -24,3 +24,19 @@ void    Channel::push(std::map<int, infoClient>::iterator it)
 {
     _clients.insert(*it);
 }
+
+
+std::map<int, infoClient>   Channel::getClients(void)
+{
+    return (this->_clients);
+}
+
+std::string Channel::getKey(void)
+{
+    return (this->_key);
+}
+
+std::string Channel::getTopic(void)
+{
+    return (this->_topic);
+}

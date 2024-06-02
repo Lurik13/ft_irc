@@ -193,7 +193,7 @@ void	Socket::parseClientInfos(std::string buffer, struct pollfd& fd)
 		line = lines.substr(start, end - start);
 		if (this->_clients.find(fd.fd) != this->_clients.end())
 		{
-			which_command(parsing.parse(line), *this, fd, this->_clients);
+			which_command(parsing.parse(line), *this, fd, this->_clients, this->_channels);
 		}
 		start = end + 2;
 	}
