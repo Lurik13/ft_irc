@@ -22,6 +22,7 @@ class Channel
     private:
         std::map<int, infoClient>   _clients;
     public:
+        void    push(std::map<int, infoClient>::iterator it);
         Channel(void);
         ~Channel(void);
 };

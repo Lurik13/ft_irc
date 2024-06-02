@@ -19,3 +19,8 @@ Channel::Channel(void)
 Channel::~Channel(void)
 {
 }
+
+void    Channel::push(std::map<int, infoClient>::iterator it)
+{
+    _clients.insert(*it);
+}

@@ -19,4 +19,7 @@
 void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients);
 void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients);
 void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients);
+void	quit(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients);
+void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients);
+void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients);
 void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients);

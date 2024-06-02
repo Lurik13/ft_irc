@@ -106,16 +106,52 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 }
 
+void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+{
+	(void)socket;
+	std::cout << "Je passe join\n";
+	if (parse.getArgs().size() == 1)
+	{
+		std::string toSend = ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " JOIN " + parse.getArgs().at(0) + "\r\n";
+		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+	}
+	else
+	{
+		std::string toSend = "JOIN :needs one param.\r\n";
+		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+	}
+}
+
+void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
+{
+	(void)socket;
+	std::cout << "Je passe part" << std::endl;
+	if (parse.getArgs().size() == 1)
+	{
+		std::string toSend = ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PART " + parse.getArgs().at(0) + "\r\n";
+		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+	}
+	else
+	{
+		std::string toSend = "PART :needs one param.\r\n";
+		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+	}
+}
+
 void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients)
 {
 	size_t		i = 0;
-	std::string	cmdptr[] = {"PASS", "NICK", "USER", "QUIT", "PING"};
-	void		(*fxptr[])(Parse&, Socket&, struct pollfd&, std::map<int, infoClient>&) = {pass, nick, user, quit, ping};
+	std::string	cmdptr[] = {"PASS", "NICK", "USER", "QUIT", "PING", "JOIN", "PART"};
+	void		(*fxptr[])(Parse&, Socket&, struct pollfd&, std::map<int, infoClient>&) = {pass, nick, user, quit, ping, join, part};
 
 	while (parse.getCmd() != cmdptr[i])
 	{
 		i++;
-		if (i > cmdptr->size())
+		if (i > 5)
 			return ;
 	}
 	(*fxptr[i])(parse, socket, fd, clients);
