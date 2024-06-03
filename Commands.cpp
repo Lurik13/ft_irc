@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/31 17:00:20 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/03 17:45:21 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,3 +172,4 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 //     — k : Définir/supprimer la clé du canal (mot de passe)
 //     — o : Donner/retirer le privilège de l’opérateur de canal
 //     — l : Définir/supprimer la limite d’utilisateurs pour le canal
+

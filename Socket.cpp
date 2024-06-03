@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/31 16:53:57 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/03 21:56:39 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 // Définir l'opérateur d'égalité pour la structure pollfd
 bool operator==(const pollfd& lhs, const pollfd& rhs) {
-    return lhs.fd == rhs.fd && lhs.events == rhs.events && lhs.revents == rhs.revents;
+	return lhs.fd == rhs.fd && lhs.events == rhs.events && lhs.revents == rhs.revents;
 }
 
 std::string	Socket::getPassword() {return this->_password;}
@@ -44,12 +44,12 @@ Socket::Socket(in_addr_t addr, in_port_t port, sa_family_t family, std::string p
 	this->_password = password;
 	// creation of the socket (socket is a file descriptor)
 	// pollfd configuration structure for multiple non-blocking file descriptors
-    fd.fd = socket(family, SOCK_STREAM, 0);
+	fd.fd = socket(family, SOCK_STREAM, 0);
 	fd.events = POLLIN;
 	fd.revents = 0;
-    if (fd.fd < 0)
-    {
-        throw Error::Exception("Error: socket!");
+	if (fd.fd < 0)
+	{
+		throw Error::Exception("Error: socket!");
 	}
 	this->_fds.push_back(fd);
 	this->_clients[fd.fd].ipv4 = this->_ipv4;
@@ -75,16 +75,16 @@ Socket::~Socket(void)
 
 void    Socket::launch(void)
 {
-    std::cout << WHITE << "Launching the server..." << RESET << std::endl;
+	std::cout << WHITE << "Launching the server..." << RESET << std::endl;
 	// bind the socket to the address and port
 	int opt = 1;
 	if (setsockopt(this->_fds[0].fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 			throw Error::Exception("Error: setsockopt!");
 	int status = bind(this->_fds[0].fd, reinterpret_cast<struct sockaddr *>(&this->_ipv4), sizeof(this->_ipv4));
-    if (status)
+	if (status)
 		throw Error::Exception("Error: bind!");
 	// listen for incoming connections
-    if (listen(this->_fds[0].fd, 5))
+	if (listen(this->_fds[0].fd, 5))
 		throw Error::Exception("Error: listen!");
 }
 
@@ -139,6 +139,11 @@ infoClient	Socket::registration(struct pollfd& fd, infoClient& client)
 		std::string myinfo = "004 " + client.nickname + " :There are 1 users and 0 services on 1 servers (PENSER A MODIFIER)\r\n";
 		if (send(fd.fd, myinfo.c_str(), myinfo.size(), 0) < 0)
 			throw Error::Exception("Error: send!");
+
+		std::string isupport = "005 " + client.nickname + " :The channels must begin with a '#'.\r\n";
+		if (send(fd.fd, isupport.c_str(), isupport.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+
 		client.is_first = false;
 	}
 	return (client);

@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:09 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/31 10:45:10 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/03 21:54:16 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,21 +22,34 @@ Channel::~Channel(void)
 
 void    Channel::push(std::map<int, infoClient>::iterator it)
 {
-    _clients.insert(*it);
+	_clients.insert(*it);
 }
 
 
 std::map<int, infoClient>   Channel::getClients(void)
 {
-    return (this->_clients);
+	return (this->_clients);
 }
 
 std::string Channel::getKey(void)
 {
-    return (this->_key);
+	return (this->_key);
 }
 
 std::string Channel::getTopic(void)
 {
-    return (this->_topic);
+	return (this->_topic);
+}
+
+
+bool    isChannel(std::string str)
+{
+	if (str.size() < 2 || str.size() > 50)
+		return (0);
+	if (str[0] != '#')
+		return (0);
+	for (int i = 1; str[i]; i++)
+		if (str[i] == ' ' || str[i] == '\a' || str[i] == ',' || str[i] == ':')
+			return (0);
+	return (1);
 }
