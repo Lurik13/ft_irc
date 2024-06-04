@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/04 12:36:39 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/04 14:03:55 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,9 +83,8 @@ void	quit(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	(void)parse;
 	(void)socket;
 	(void)clients;
-	(void)fd;
 	(void)channel;
-	// socket.ft_erase(fd);
+	socket.ft_erase(fd);
 }
 
 void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
