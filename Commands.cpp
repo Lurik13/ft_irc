@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/03 17:45:21 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/04 12:36:39 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,13 +118,21 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	(void)fd;
 	(void)clients;
 	(void)channel;
-	for (unsigned long i = 0; i < parse.getArgs().size(); i++)
+	// for (unsigned long i = 0; i < parse.getArgs().size(); i++)
+	// {
+	// 	std::cout << parse.getArgs().at(i) << std::endl;
+	// 	if (i % 2)
+	// 		std::cout << "PAIR" << std::endl;
+	// 	else
+	// 		std::cout << "IMPAIR" << std::endl;
+	// }
+	if (parse.getArgs().size() == 0 || parse.getArgs().size() > 2)
 	{
-		std::cout << parse.getArgs().at(i) << std::endl;
-		if (i % 2)
-			std::cout << "PAIR" << std::endl;
-		else
-			std::cout << "IMPAIR" << std::endl;
+		send(fd.fd, "Usage: /USER <username> <hostname> <servername> <realname>\r\n", 61, 0);
+		std::string toSend = "Usage: /JOIN <channel> *( \",\" <channel> ) [ <key> *( \",\" <key> ) ]\r\n";
+		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+		return ;
 	}
 }
 
