@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/05 11:31:11 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/05 16:16:15 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 	if (parse.getArgs().size() < 1)
 	{
+		std::cout << MAGENTA << "Usage: /PASS <password>" << RESET << std::endl;
 		if (send(fd.fd, "Usage: /PASS <password>\r\n", 26, 0) < 0)
 			throw Error::Exception("Error: send!");
 		error = 1;
@@ -35,6 +36,7 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 	if (password != socket.getPassword())
 	{
+		std::cout << MAGENTA << "Invalid password!" << RESET << std::endl;
 		if (send(fd.fd, "Invalid password!\r\n", 20, 0) < 0)
 			throw Error::Exception("Error: send!");
 		error = 1;
@@ -46,9 +48,9 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
 	(void)channel;
-	std::cout << "Je passe nick\n";
 	if (parse.getArgs().size() != 1)
 	{
+		std::cout << MAGENTA << "Usage: /NICK <nickname>" << RESET << std::endl;
 		if (send(fd.fd, "Usage: /NICK <nickname>\r\n", 26, 0) < 0)
 			throw Error::Exception("Error: send!");
 		if (clients[fd.fd].nickname == "")
@@ -59,6 +61,7 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		if (clients[fd.fd].nickname != "")
 		{
 			std::string toSend = ":" + clients[fd.fd].nickname + " NICK " + parse.getArgs().at(0) + "\r\n";
+			std::cout << MAGENTA << toSend << RESET << std::endl;
 			if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
 				throw Error::Exception("Error: send!");
 		}
@@ -69,9 +72,9 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
 	(void)channel;
-	std::cout << "Je passe user\n";
 	if (parse.getArgs().size() != 4)
 	{
+		std::cout << MAGENTA << "Usage: /USER <username> <hostname> <servername> <realname>" << RESET << std::endl;
 		send(fd.fd, "Usage: /USER <username> <hostname> <servername> <realname>\r\n", 61, 0);
 		socket.ft_erase(fd);
 	}
@@ -100,18 +103,18 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	(void)socket;
 	(void)clients;
 	(void)channel;
-	std::cout << "Je passe ping\n";
 	if (parse.getArgs().size() == 1 || parse.getArgs().size() == 2)
 	{
 		// std::string toSend = "PONG " + clients[fd.fd].servername + " :" + parse.getArgs().at(0) + "\r\n";
 		std::string toSend = "PONG " + parse.getArgs().at(0) + "\r\n";
+		std::cout << MAGENTA << toSend << RESET << std::endl;
 		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
 			throw Error::Exception("Error: send!");
-		std::cout << toSend;
 	}
 	else
 	{
 		std::string toSend = "PING :needs one param.\r\n";
+		std::cout << MAGENTA << toSend << RESET << std::endl;
 		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
 			throw Error::Exception("Error: send!");
 	}
@@ -132,13 +135,15 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	// 	else
 	// 		std::cout << "IMPAIR" << std::endl;
 	// }
-	if (parse.getArgs().size() == 0 || parse.getArgs().size() > 2)
-	{
-		std::string toSend = "Usage: /JOIN <channel> {<key>}\r\n";
-		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
-			throw Error::Exception("Error: send!");
-		return ;
-	}
+	
+	// if (parse.getArgs().size() == 0 || parse.getArgs().size() > 2)
+	// {
+	// 	std::string toSend = "Usage: /JOIN <channel> {<key>}\r\n";
+	// 	std::cout << MAGENTA << toSend << RESET << std::endl;
+	// 	if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+	// 		throw Error::Exception("Error: send!");
+	// 	return ;
+	// }
 }
 
 void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
