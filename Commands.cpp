@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/05 11:16:54 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/05 11:31:11 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,8 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	{
 		if (send(fd.fd, "Usage: /NICK <nickname>\r\n", 26, 0) < 0)
 			throw Error::Exception("Error: send!");
-		socket.ft_erase(fd);
+		if (clients[fd.fd].nickname == "")
+			socket.ft_erase(fd);
 	}
 	else
 	{
