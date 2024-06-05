@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/03 21:56:39 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/04 21:33:24 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ infoClient	Socket::registration(struct pollfd& fd, infoClient& client)
 		if (send(fd.fd, myinfo.c_str(), myinfo.size(), 0) < 0)
 			throw Error::Exception("Error: send!");
 
-		std::string isupport = "005 " + client.nickname + " :The channels must begin with a '#'.\r\n";
+		std::string isupport = "005 " + client.nickname + " :The channels must begin with a '#'. You can join only one channel.\r\n";
 		if (send(fd.fd, isupport.c_str(), isupport.size(), 0) < 0)
 			throw Error::Exception("Error: send!");
 

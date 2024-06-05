@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/04 14:03:55 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/05 11:16:54 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,12 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 	else
 	{
+		if (clients[fd.fd].nickname != "")
+		{
+			std::string toSend = ":" + clients[fd.fd].nickname + " NICK " + parse.getArgs().at(0) + "\r\n";
+			if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+				throw Error::Exception("Error: send!");
+		}
 		clients[fd.fd].nickname = parse.getArgs().at(0);
 	}
 }
@@ -127,8 +133,7 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	// }
 	if (parse.getArgs().size() == 0 || parse.getArgs().size() > 2)
 	{
-		send(fd.fd, "Usage: /USER <username> <hostname> <servername> <realname>\r\n", 61, 0);
-		std::string toSend = "Usage: /JOIN <channel> *( \",\" <channel> ) [ <key> *( \",\" <key> ) ]\r\n";
+		std::string toSend = "Usage: /JOIN <channel> {<key>}\r\n";
 		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
 			throw Error::Exception("Error: send!");
 		return ;
