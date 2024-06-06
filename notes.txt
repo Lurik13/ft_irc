@@ -24,3 +24,16 @@ Le parsing :
     command : MODE
     arguments[0] : nickname
     arguments[1] : +i
+
+-------------
+
+Channels names are strings (beginning with a '&', '#', '+' or '!' character) of length up to fifty (50) characters.
+Channel names are case insensitive.
+
+Once a user has joined a channel, he receives information about all commands his server receives affecting the channel.  This
+includes JOIN, MODE, KICK, PART, QUIT and of course PRIVMSG/NOTICE.
+This allows channel members to keep track of the other channel members, as well as channel modes.
+
+RPL_TOPIC
+<channel>: No topic is set
+<channel>: <topic>

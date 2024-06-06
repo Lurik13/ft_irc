@@ -122,11 +122,83 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
-	(void)parse;
 	(void)socket;
 	(void)fd;
 	(void)clients;
 	(void)channel;
+	std::string channelName = parse.getArgs().at(0);
+	std::string key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
+	bool		check = 0;
+
+	std::cout << parse.getArgs().size() << std::endl;
+	if (parse.getArgs().size() == 0 || parse.getArgs().size() > 2)
+	{
+		std::string toSend = "Usage: /JOIN <channel> {<key>}\r\n";
+		std::cout << MAGENTA << toSend << RESET << std::endl;
+		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+		return ;
+	}
+	std::stringstream	nameStream(channelName);
+	std::stringstream	keyStream(key);
+
+	while (std::getline(nameStream, channelName, ',') || std::getline(keyStream, key, ','))
+	{
+		std::cout << channelName << std::endl;
+		std::cout << key << std::endl;
+		for (unsigned long int i = 0; i < channel.size(); i++)
+		{
+			// if channel exists
+			if (channel.at(i).getName() != "" && channel.at(i).getName() == channelName)
+			{
+				// if key is not wrong
+				if (channel.at(i).getKey() == key)
+				{
+					std::cout << "Key is correct" << std::endl;
+					// if client is already in the channel
+					if (channel.at(i).getClients().find(fd.fd) != channel.at(i).getClients().end())
+					{
+						std::cout << RED << fd.fd << RESET << std::endl;
+						std::cout << "You are already in this channel" << std::endl;
+						std::string toSend = "You are already in this channel.\r\n";
+						std::cout << MAGENTA << toSend << RESET << std::endl;
+						if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+							throw Error::Exception("Error: send!");
+					}
+					else
+					{
+						std::cout << "You have joined the channel" << std::endl;
+						channel.at(i).push(clients.find(fd.fd), channelName, key, "No topic is set");
+						std::string toSend = "You have joined the channel " + channelName + "\r\n";
+						std::cout << MAGENTA << toSend << RESET << std::endl;
+						if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+							throw Error::Exception("Error: send!");
+					}
+				}
+				else
+				{
+					std::string toSend = "Invalid key.\r\n";
+					std::cout << MAGENTA << toSend << RESET << std::endl;
+					if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+						throw Error::Exception("Error: send!");
+				}
+				check = 1;
+				break;
+			}
+		}
+		if (check == 1)
+			return ;
+		// if channel does not exist
+		std::cout << RED << fd.fd << RESET << std::endl;
+		std::cout << "Channel does not exist" << std::endl;
+		channel.push_back(Channel());
+		channel.back().push(clients.find(fd.fd), channelName, key, "No topic is set");
+		std::string toSend = "You have joined the channel " + channelName + "\r\n";
+		std::cout << MAGENTA << toSend << RESET << std::endl;
+		if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
+			throw Error::Exception("Error: send!");
+	}
+
 	// for (unsigned long i = 0; i < parse.getArgs().size(); i++)
 	// {
 	// 	std::cout << parse.getArgs().at(i) << std::endl;
