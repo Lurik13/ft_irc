@@ -17,6 +17,7 @@
 #include "Parse.hpp"
 #include "Channel.hpp"
 
+void    toSend(int fd, std::string errToSend);
 void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel);
 void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel);
 void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel);
