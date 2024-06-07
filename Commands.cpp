@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/07 18:41:23 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/07 20:59:06 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,18 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 	else
 	{
-		if (clients[fd.fd].nickname != "")
+		std::cout << "nickname en haut = " << clients[fd.fd].nickname << std::endl;
+		if (clients[fd.fd].nickname == "")
+		{
+			toSend(fd.fd, ":NICK " + parse.getArgs().at(0) + "\r\n");
+		}
+		else
+		{
 			toSend(fd.fd, ":" + clients[fd.fd].nickname + " NICK " + parse.getArgs().at(0) + "\r\n");
+		}
+		std::cout << "je passe ici" << std::endl;
 		clients[fd.fd].nickname = parse.getArgs().at(0);
+		std::cout << "nickname en bas = " << clients[fd.fd].nickname << std::endl;
 	}
 }
 
@@ -214,12 +223,18 @@ void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
 {
-	(void)parse;
+	// (void)parse;
 	(void)socket;
 	(void)fd;
 	(void)clients;
 	(void)channels;
-	
+	// std::cout << MAGENTA << "TOPIC" << parse.getArgs().at(0) << std::endl;
+	if (parse.getArgs().size() == 1 || parse.getArgs().size() == 2)
+	{
+		// std::string toSend = "PONG " + clients[fd.fd].servername + " :" + parse.getArgs().at(0) + "\r\n";
+		toSend(fd.fd, "TOPIC " + parse.getArgs().at(0) + "\r\n");
+	}
+	// if (parse.getArgs())
 }
 
 void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
@@ -230,9 +245,9 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 
 	while (parse.getCmd() != cmdptr[i])
 	{
-		i++;
-		if (i > 5)
+		if (i > 8)
 			return ;
+		i++;
 	}
 	(*fxptr[i])(parse, socket, fd, clients, channels);
 }
