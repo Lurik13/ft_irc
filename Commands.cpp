@@ -120,9 +120,7 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
 {
 	(void)socket;
-	(void)fd;
 	(void)clients;
-	(void)channel;
 	std::string channelName = parse.getArgs().at(0);
 	std::string key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
 	bool		check = 0;
@@ -157,6 +155,7 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 						std::cout << "You have joined the channel" << std::endl;
 						channel.at(i).push(clients.find(fd.fd), channelName, key, "No topic is set");
 						toSend(fd.fd, "You have joined the channel " + channelName + "\r\n");
+						toSend(fd.fd, channel.at(i).getName() + " :" + channel.at(i).getTopic() + "\r\n");
 					}
 				}
 				else
@@ -172,9 +171,10 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		// if channel does not exist
 		std::cout << RED << fd.fd << RESET << std::endl;
 		std::cout << "Channel does not exist" << std::endl;
-		channel.push_back(Channel());
-		channel.back().push(clients.find(fd.fd), channelName, key, "No topic is set");
-		toSend(fd.fd, "You have joined the channel " + channelName + "\r\n");
+		Channel	channel;
+		channel.push(clients.find(fd.fd), channelName, key, "No topic is set");
+		toSend(fd.fd, "You have joined the channel " + channel.getName() + "\r\n");
+		toSend(fd.fd, channel.getName() + " :" + channel.getTopic() + "\r\n");
 	}
 
 	// for (unsigned long i = 0; i < parse.getArgs().size(); i++)

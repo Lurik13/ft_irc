@@ -37,3 +37,24 @@ This allows channel members to keep track of the other channel members, as well 
 RPL_TOPIC
 <channel>: No topic is set
 <channel>: <topic>
+
+
+Types de canaux et leurs modes
+En IRC, les canaux peuvent être configurés avec différents modes qui affectent leur visibilité et leurs propriétés :
+
+Public (=) : Un canal public est visible dans les listes de canaux et tout utilisateur peut le voir et y accéder, sauf si des restrictions supplémentaires sont définies.
+Privé (*) : Un canal privé n'apparaît pas dans les listes de canaux (/list), mais les utilisateurs peuvent toujours voir qui est dans le canal s'ils connaissent le nom du canal.
+Secret (@) : Un canal secret n'apparaît ni dans les listes de canaux ni dans les WHOIS des utilisateurs qui ne sont pas dans le canal.
+
+RPL_NAMREPLY : ( '=' / '*' / '@' ) <channel> ' ' : [ '@' / '+' ] <nick> *( ' ' [ '@' / '+' ] <nick> )
+
+Explications des paramètres :
+server : Le nom du serveur qui envoie le message.
+353 : Le code de réponse RPL_NAMREPLY.
+<nick> : Le pseudonyme du client recevant le message.
+<symbol> : Un symbole indiquant le type de canal :
+= : Public
+* : Privé
+@ : Secret
+<channel> : Le nom du canal dont on liste les utilisateurs.
+[ '@' / '+' ] <nick> : Les noms des utilisateurs avec des préfixes indiquant leur statut (opérateur @ ou voix +), suivis d'un espace entre chaque utilisateur.
