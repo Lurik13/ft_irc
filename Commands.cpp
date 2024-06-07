@@ -6,23 +6,23 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/05 16:16:15 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/07 18:41:23 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Commands.hpp"
 
-void	toSend(int fd, std::string errToSend)
+void	toSend(int fd, std::string str)
 {
-	std::cout << MAGENTA << errToSend << RESET << std::endl;
-	if (send(fd, errToSend.c_str(), errToSend.size(), 0) < 0)
+	std::cout << MAGENTA << str << RESET << std::endl;
+	if (send(fd, str.c_str(), str.size(), 0) < 0)
 		throw Error::Exception("Error: send!");
 }
 
-void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
+void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
 {
 	(void)clients;
-	(void)channel;
+	(void)channels;
 	int error = 0;
 
 	if (parse.getArgs().size() < 1)
@@ -48,37 +48,29 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		socket.ft_erase(fd);
 }
 
-void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
+void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
 {
-	(void)channel;
+	(void)channels;
 	if (parse.getArgs().size() != 1)
 	{
-		std::cout << MAGENTA << "Usage: /NICK <nickname>" << RESET << std::endl;
-		if (send(fd.fd, "Usage: /NICK <nickname>\r\n", 26, 0) < 0)
-			throw Error::Exception("Error: send!");
+		toSend(fd.fd, "Usage: /NICK <nickname>\r\n");
 		if (clients[fd.fd].nickname == "")
 			socket.ft_erase(fd);
 	}
 	else
 	{
 		if (clients[fd.fd].nickname != "")
-		{
-			std::string toSend = ":" + clients[fd.fd].nickname + " NICK " + parse.getArgs().at(0) + "\r\n";
-			std::cout << MAGENTA << toSend << RESET << std::endl;
-			if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
-				throw Error::Exception("Error: send!");
-		}
+			toSend(fd.fd, ":" + clients[fd.fd].nickname + " NICK " + parse.getArgs().at(0) + "\r\n");
 		clients[fd.fd].nickname = parse.getArgs().at(0);
 	}
 }
 
-void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
+void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
 {
-	(void)channel;
+	(void)channels;
 	if (parse.getArgs().size() != 4)
 	{
-		std::cout << MAGENTA << "Usage: /USER <username> <hostname> <servername> <realname>" << RESET << std::endl;
-		send(fd.fd, "Usage: /USER <username> <hostname> <servername> <realname>\r\n", 61, 0);
+		toSend(fd.fd, "Usage: /USER <username> <hostname> <servername> <realname>\r\n");
 		socket.ft_erase(fd);
 	}
 	else
@@ -91,21 +83,21 @@ void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 }
 
 // ----------------- A CORRIGER -----------------
-void	quit(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
+void	quit(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
 {
 	(void)parse;
 	(void)socket;
 	(void)clients;
-	(void)channel;
+	(void)channels;
 	socket.ft_erase(fd);
 }
 
-void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
+void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
 {
 	(void)parse;
 	(void)socket;
 	(void)clients;
-	(void)channel;
+	(void)channels;
 	if (parse.getArgs().size() == 1 || parse.getArgs().size() == 2)
 	{
 		// std::string toSend = "PONG " + clients[fd.fd].servername + " :" + parse.getArgs().at(0) + "\r\n";
@@ -117,99 +109,124 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 }
 
-void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
+void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
 {
 	(void)socket;
 	(void)clients;
-	std::string channelName = parse.getArgs().at(0);
-	std::string key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
-	bool		check = 0;
+	std::string 		channelName = parse.getArgs().at(0);
+	std::string 		key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
+	std::stringstream	nameStream(channelName);
+	std::stringstream	keyStream(key);
+	bool				check = 0;
+	std::vector<std::string>	channelNames;
+	std::vector<std::string>	keys;
 
-	std::cout << parse.getArgs().size() << std::endl;
 	if (parse.getArgs().size() == 0 || parse.getArgs().size() > 2)
 	{
 		toSend(fd.fd, "Usage: /JOIN <channel> {<key>}\r\n");
 		return ;
 	}
-	std::stringstream	nameStream(channelName);
-	std::stringstream	keyStream(key);
-
-	while (std::getline(nameStream, channelName, ',') || std::getline(keyStream, key, ','))
+	while (std::getline(nameStream, channelName, ','))
+		channelNames.push_back(channelName);
+	while (std::getline(keyStream, key, ','))
+		keys.push_back(key);
+	channelName = "";
+	key = "";
+	for (unsigned long int i = 0; i < channelNames.size(); i++)
 	{
-		std::cout << channelName << std::endl;
-		std::cout << key << std::endl;
-		for (unsigned long int i = 0; i < channel.size(); i++)
+		for (unsigned long int j = 0; j < channels.size(); j++)
 		{
 			// if channel exists
-			if (channel.at(i).getName() != "" && channel.at(i).getName() == channelName)
+			if (channels.at(j).getName() == channelNames[i])
 			{
+				std::cout << "The channel exists" << std::endl;
 				// if key is not wrong
-				if (channel.at(i).getKey() == key)
+				key = keys.size() <= i ? "" : keys[i];
+				if (channels.at(j).getKey() == key)
 				{
 					std::cout << "Key is correct" << std::endl;
 					// if client is already in the channel
-					if (channel.at(i).getClients().find(fd.fd) != channel.at(i).getClients().end())
+					if (channels.at(j).getClients().find(fd.fd) != channels.at(j).getClients().end())
 						toSend(fd.fd, "You are already in the channel\r\n");
 					else
 					{
 						std::cout << "You have joined the channel" << std::endl;
-						channel.at(i).push(clients.find(fd.fd), channelName, key, "No topic is set");
-						toSend(fd.fd, "You have joined the channel " + channelName + "\r\n");
-						toSend(fd.fd, channel.at(i).getName() + " :" + channel.at(i).getTopic() + "\r\n");
+						channels.at(j).push(clients.find(fd.fd), channelNames[i], key, "No topic is set");
+						channels.push_back(channels.at(j).getChannel());
+						toSend(fd.fd, "You have joined the channel " + channelNames[i] + "\r\n");
+						toSend(fd.fd, channelNames[i] + " :" + channels.at(i).getTopic() + "\r\n");
+						// send list of users in the channel (RPL_NAMREPLY)
+						std::string	listOfUsers;
+						for (std::map<int, infoClient>::iterator it = channels.at(j).getClients().begin(); it != channels.at(j).getClients().end();)
+						{
+							listOfUsers += it->second.mode + it->second.nickname;
+							++it;
+							if (it != channels.at(j).getClients().end())
+								listOfUsers += " ";
+						}
+						toSend(fd.fd, channelNames[i] + " :" + listOfUsers + "\r\n");
+						toSend(fd.fd, channelNames[i] + " :" + "End of /NAMES list.\r\n");
 					}
 				}
 				else
 				{
+					std::cout << "Invalid key" << std::endl;
 					toSend(fd.fd, "Invalid key.\r\n");
 				}
 				check = 1;
 				break;
 			}
 		}
-		if (check == 1)
-			return ;
+		// if channel exists
+		if (check == 1 && i < channelNames.size())
+			continue ;
 		// if channel does not exist
-		std::cout << RED << fd.fd << RESET << std::endl;
 		std::cout << "Channel does not exist" << std::endl;
 		Channel	channel;
-		channel.push(clients.find(fd.fd), channelName, key, "No topic is set");
+		clients[fd.fd].mode = "@";
+		key = keys.size() <= i ? "" : keys[i];
+		channel.push(clients.find(fd.fd), channelNames[i], key, "No topic is set");
+		channels.push_back(channel.getChannel());
 		toSend(fd.fd, "You have joined the channel " + channel.getName() + "\r\n");
 		toSend(fd.fd, channel.getName() + " :" + channel.getTopic() + "\r\n");
+		// send list of users in the channel (RPL_NAMREPLY)
+		std::string	listOfUsers;
+		for (std::map<int, infoClient>::iterator it = channel.getClients().begin(); it != channel.getClients().end();)
+		{
+			listOfUsers += it->second.mode + it->second.nickname;
+			++it;
+			if (it != channel.getClients().end())
+				listOfUsers += " ";
+		}
+		toSend(fd.fd, channelNames[i] + " :" + listOfUsers + "\r\n");
+		toSend(fd.fd, channelNames[i] + " :" + "End of /NAMES list.\r\n");
 	}
-
-	// for (unsigned long i = 0; i < parse.getArgs().size(); i++)
-	// {
-	// 	std::cout << parse.getArgs().at(i) << std::endl;
-	// 	if (i % 2)
-	// 		std::cout << "PAIR" << std::endl;
-	// 	else
-	// 		std::cout << "IMPAIR" << std::endl;
-	// }
-	
-	// if (parse.getArgs().size() == 0 || parse.getArgs().size() > 2)
-	// {
-	// 	std::string toSend = "Usage: /JOIN <channel> {<key>}\r\n";
-	// 	std::cout << MAGENTA << toSend << RESET << std::endl;
-	// 	if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
-	// 		throw Error::Exception("Error: send!");
-	// 	return ;
-	// }
 }
 
-void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
+void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
 {
 	(void)parse;
 	(void)socket;
 	(void)fd;
 	(void)clients;
-	(void)channel;
+	(void)channels;
 }
 
-void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
+void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
+{
+	(void)parse;
+	(void)socket;
+	(void)fd;
+	(void)clients;
+	(void)channels;
+	
+}
+
+void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
 {
 	size_t		i = 0;
-	std::string	cmdptr[] = {"PASS", "NICK", "USER", "QUIT", "PING", "JOIN", "PART"};
-	void		(*fxptr[])(Parse&, Socket&, struct pollfd&, std::map<int, infoClient>&, std::vector<class Channel>&) = {pass, nick, user, quit, ping, join, part};
+	std::string	cmdptr[] = {"PASS", "NICK", "USER", "QUIT", "PING", "JOIN", "PART", "TOPIC"};
+	void		(*fxptr[])(Parse&, Socket&, struct pollfd&, std::map<int, infoClient>, std::vector<class Channel>&) = {pass, nick, user, quit, ping, join, part, topic};
 
 	while (parse.getCmd() != cmdptr[i])
 	{
@@ -217,14 +234,14 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 		if (i > 5)
 			return ;
 	}
-	(*fxptr[i])(parse, socket, fd, clients, channel);
+	(*fxptr[i])(parse, socket, fd, clients, channels);
 }
 
 // CAP, NICK, USER, QUIT, PING, WHOIS, PASS, JOIN, "WHO", "PART", "LUSERS", "MOTD", "PRIVMSG"
 
 // CAP - Négocier les capacités du client et du serveur
 // PASS - Définir le mot de passe du client ✅
-// NICK - Définir le pseudo du client
+// NICK - Définir le pseudo du client ✅
 // USER - Définir le nom d’utilisateur du client
 // MODE - Changer le mode du client
 // WHOIS - Obtenir des informations sur un client

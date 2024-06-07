@@ -32,4 +32,5 @@ class Channel
 		std::string					getName(void);
 		std::string                 getKey(void);
 		std::string                 getTopic(void);
+		Channel&					getChannel(void);
 };

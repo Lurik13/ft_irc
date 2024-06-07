@@ -48,6 +48,10 @@ std::string Channel::getTopic(void)
 	return (this->_topic);
 }
 
+Channel&	Channel::getChannel(void)
+{
+	return (*this);
+}
 
 bool    isChannel(std::string str)
 {

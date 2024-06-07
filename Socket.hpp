@@ -26,6 +26,7 @@ typedef struct infoClient
 	std::string		servername;
 	std::string		realname;
 	std::string		hostname;
+	std::string		mode;
 	bool			is_first;
 	// std::string		channel;
 }				infoClient;
