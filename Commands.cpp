@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/07 23:20:01 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/08 12:09:18 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	(void)channel;
+	(void)channels;
 	if (parse.getArgs().size() != 1)
 	{
 		if (send(fd.fd, "Usage: /NICK <nickname>\r\n", 26, 0) < 0)
@@ -67,6 +67,7 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 			// 	throw Error::Exception("Error: send!");
 		// }
 		clients[fd.fd].nickname = parse.getArgs().at(0);
+		std::cout << "Nickname: " << clients[fd.fd].nickname << std::endl;
 	}
 }
 
@@ -233,7 +234,7 @@ void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCl
 	// if (parse.getArgs())
 }
 
-void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient> clients, std::vector<class Channel>& channels)
+void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
 	size_t		i = 0;
 	std::string	cmdptr[] = {"PASS", "NICK", "USER", "QUIT", "PING", "JOIN", "PART", "TOPIC"};
@@ -241,10 +242,11 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 
 	while (parse.getCmd() != cmdptr[i])
 	{
-		if (i > 8)
-			return ;
 		i++;
+		if (i > 6)
+			return ;
 	}
+	std::cout << "Nickname: " << clients[fd.fd].nickname << std::endl;
 	(*fxptr[i])(parse, socket, fd, clients, channels);
 }
 
