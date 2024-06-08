@@ -26,6 +26,7 @@ class Channel
 		std::string                 _topic; // topic du channel (EST-CE QUE C'EST UNE STRING LE TOPIC?)
 	public:
 		Channel(void);
+		Channel&					Channel(int fd, std::string name, std::string key, std::string topic, std::string mode);
 		~Channel(void);
 		void						push(std::map<int, std::string>::iterator it, std::string& name, std::string key, std::string topic);
 		std::map<int, std::string>&	getClients(void);

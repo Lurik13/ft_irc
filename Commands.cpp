@@ -119,13 +119,12 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 {
 	(void)socket;
 	(void)clients;
+	(void)channels;
 	std::string 				channelName = parse.getArgs().at(0);
 	std::string 				key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
 	std::stringstream			nameStream(channelName);
 	std::stringstream			keyStream(key);
-	bool						check = 0;
-	std::vector<std::string>	channelNames;
-	std::vector<std::string>	keys;
+	std::map<std::string, std::string>	ck;
 
 	if (parse.getArgs().size() == 0 || parse.getArgs().size() > 2)
 	{
@@ -133,84 +132,149 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		return ;
 	}
 	while (std::getline(nameStream, channelName, ','))
-		channelNames.push_back(channelName);
-	while (std::getline(keyStream, key, ','))
-		keys.push_back(key);
-	channelName = "";
-	key = "";
-	for (unsigned long int i = 0; i < channelNames.size(); i++)
 	{
-		for (unsigned long int j = 0; j < channels.size(); j++)
+		if (std::getline(keyStream, key, ','))
+			ck[channelName] = key;
+		else
+			ck[channelName] = "";
+	}
+	for (std::map<std::string, std::string>::iterator it = ck.begin(); it != ck.end(); ++it)
+	{
+		std::cout << "Channel: " << it->first << " Key: " << it->second << std::endl;
+		std::map<std::string, std::string>::iterator	channel = ck.find(it->first);
+		if (channel != ck.end())
 		{
-			// if channel exists
-			if (channels.at(j).getName() == channelNames[i])
+			std::cout << "Channel exists" << std::endl;
+			// if channel requires a key
+			if (channel->second != "" && channel->second != "x")
 			{
-				std::cout << "The channel exists" << std::endl;
-				// if key is not wrong
-				key = keys.size() <= i ? "" : keys[i];
-				if (channels.at(j).getKey() == key)
+				std::cout << "Key is required" << std::endl;
+				if (channel->second == it->second)
 				{
 					std::cout << "Key is correct" << std::endl;
-					// if client is already in the channel
-					if (channels.at(j).getClients().find(fd.fd) != channels.at(j).getClients().end())
-						toSend(fd.fd, "You are already in the channel\r\n");
-					else
-					{
-						std::cout << "You have joined the channel" << std::endl;
-						std::map<int, std::string>	client;
-						client[fd.fd] = "@";
-						channels.at(j).push(client.begin(), channelNames[i], key, "No topic is set");
-						channels.push_back(channels.at(j).getChannel());
-						toSend(fd.fd, "You have joined the channel " + channelNames[i] + "\r\n");
-						toSend(fd.fd, channelNames[i] + " :" + channels.at(i).getTopic() + "\r\n");
-						// send list of users in the channel (RPL_NAMREPLY)
-						std::string	listOfUsers;
-						for (std::map<int, std::string>::iterator it = channels.at(j).getClients().begin(); it != channels.at(j).getClients().end();)
-						{
-							listOfUsers += it->second + clients.find(it->first)->second.nickname;
-							++it;
-							if (it != channels.at(j).getClients().end())
-								listOfUsers += " ";
-						}
-						toSend(fd.fd, channelNames[i] + " :" + listOfUsers + "\r\n");
-						toSend(fd.fd, channelNames[i] + " :" + "End of /NAMES list.\r\n");
-					}
 				}
 				else
 				{
 					std::cout << "Invalid key" << std::endl;
 					toSend(fd.fd, "Invalid key.\r\n");
 				}
-				check = 1;
-				break;
+			}
+			// if channel does not require a key
+			else
+			{
+				std::cout << "Key is not required" << std::endl;
 			}
 		}
-		// if channel exists
-		if (check == 1 && i < channelNames.size())
-			continue ;
-		// if channel does not exist
-		std::cout << "Channel does not exist" << std::endl;
-		Channel	channel;
-		key = keys.size() <= i ? "" : keys[i];
-		std::map<int, std::string>	client;
-		client[fd.fd] = "@";
-		channel.push(client.begin(), channelNames[i], key, "No topic is set");
-		channels.push_back(channel.getChannel());
-		toSend(fd.fd, "You have joined the channel " + channel.getName() + "\r\n");
-		toSend(fd.fd, channel.getName() + " :" + channel.getTopic() + "\r\n");
-		// send list of users in the channel (RPL_NAMREPLY)
-		std::string	listOfUsers;
-		for (std::map<int, std::string>::iterator it = channel.getClients().begin(); it != channel.getClients().end();)
+		else
 		{
-			listOfUsers += it->second + clients.find(it->first)->second.nickname;
-			++it;
-			if (it != channel.getClients().end())
-				listOfUsers += " ";
+			std::cout << "Channel does not exist" << std::endl;
+			Channel	c;
+			c.push(fd.fd, it->first, it->second, "No topic is set");
+			channels.push_back(Channel(it->first, it->second, "No topic is set"));
 		}
-		toSend(fd.fd, channelNames[i] + " :" + listOfUsers + "\r\n");
-		toSend(fd.fd, channelNames[i] + " :" + "End of /NAMES list.\r\n");
 	}
 }
+
+// void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
+// {
+// 	(void)socket;
+// 	(void)clients;
+// 	std::string 				channelName = parse.getArgs().at(0);
+// 	std::string 				key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
+// 	std::stringstream			nameStream(channelName);
+// 	std::stringstream			keyStream(key);
+// 	bool						check = 0;
+// 	std::vector<std::string>	channelNames;
+// 	std::vector<std::string>	keys;
+
+// 	if (parse.getArgs().size() == 0 || parse.getArgs().size() > 2)
+// 	{
+// 		toSend(fd.fd, "Usage: /JOIN <channel> {<key>}\r\n");
+// 		return ;
+// 	}
+// 	while (std::getline(nameStream, channelName, ','))
+// 		channelNames.push_back(channelName);
+// 	while (std::getline(keyStream, key, ','))
+// 		keys.push_back(key);
+// 	channelName = "";
+// 	key = "";
+// 	for (unsigned long int i = 0; i < channelNames.size(); i++)
+// 	{
+// 		for (unsigned long int j = 0; j < channels.size(); j++)
+// 		{
+// 			// if channel exists
+// 			if (channels.at(j).getName() == channelNames[i])
+// 			{
+// 				std::cout << "The channel exists" << std::endl;
+// 				// if key is not wrong
+// 				key = keys.size() <= i ? "" : keys[i];
+// 				if (channels.at(j).getKey() == key)
+// 				{
+// 					std::cout << "Key is correct" << std::endl;
+// 					// if client is already in the channel
+// 					if (channels.at(j).getClients().find(fd.fd) != channels.at(j).getClients().end())
+// 						toSend(fd.fd, "You are already in the channel\r\n");
+// 					else
+// 					{
+// 						std::cout << "You have joined the channel" << std::endl;
+// 						// ----------------------------- //
+// 						std::map<int, std::string>	client;
+// 						client[fd.fd] = "@";
+// 						channels.at(j).push(client.begin(), channelNames[i], key, "No topic is set");
+// 						channels.push_back(channels.at(j).getChannel());
+// 						toSend(fd.fd, "You have joined the channel " + channelNames[i] + "\r\n");
+// 						toSend(fd.fd, channelNames[i] + " :" + channels.at(i).getTopic() + "\r\n");
+// 						// send list of users in the channel (RPL_NAMREPLY)
+// 						std::string	listOfUsers;
+// 						for (std::map<int, std::string>::iterator it = channels.at(j).getClients().begin(); it != channels.at(j).getClients().end();)
+// 						{
+// 							listOfUsers += it->second + clients.find(it->first)->second.nickname;
+// 							++it;
+// 							if (it != channels.at(j).getClients().end())
+// 								listOfUsers += " ";
+// 						}
+// 						toSend(fd.fd, channelNames[i] + " :" + listOfUsers + "\r\n");
+// 						toSend(fd.fd, channelNames[i] + " :" + "End of /NAMES list.\r\n");
+// 						//  ----------------------------- //
+// 					}
+// 				}
+// 				else
+// 				{
+// 					std::cout << "Invalid key" << std::endl;
+// 					toSend(fd.fd, "Invalid key.\r\n");
+// 				}
+// 				check = 1;
+// 				break;
+// 			}
+// 		}
+// 		// if channel exists
+// 		if (check == 1 && i < channelNames.size())
+// 			continue ;
+// 		// if channel does not exist
+// 		std::cout << "Channel does not exist" << std::endl;
+// 		Channel	channel;
+// 		key = keys.size() <= i ? "" : keys[i];
+// 		//  ----------------------------- //
+// 		std::map<int, std::string>	client;
+// 		client[fd.fd] = "@";
+// 		channel.push(client.begin(), channelNames[i], key, "No topic is set");
+// 		channels.push_back(channel.getChannel());
+// 		toSend(fd.fd, "You have joined the channel " + channel.getName() + "\r\n");
+// 		toSend(fd.fd, channel.getName() + " :" + channel.getTopic() + "\r\n");
+// 		// send list of users in the channel (RPL_NAMREPLY)
+// 		std::string	listOfUsers;
+// 		for (std::map<int, std::string>::iterator it = channel.getClients().begin(); it != channel.getClients().end();)
+// 		{
+// 			listOfUsers += it->second + clients.find(it->first)->second.nickname;
+// 			++it;
+// 			if (it != channel.getClients().end())
+// 				listOfUsers += " ";
+// 		}
+// 		toSend(fd.fd, channelNames[i] + " :" + listOfUsers + "\r\n");
+// 		toSend(fd.fd, channelNames[i] + " :" + "End of /NAMES list.\r\n");
+// 		//  ----------------------------- //
+// 	}
+// }
 
 void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {

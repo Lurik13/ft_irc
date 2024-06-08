@@ -16,6 +16,17 @@ Channel::Channel(void)
 {
 }
 
+Channel&	Channel::Channel(int fd, std::string name, std::string key, std::string topic, std::string mode)
+{
+	std::map<int, std::string>::iterator it;
+
+	it = _clients.begin();
+	it->first = fd;
+	it->second = mode;
+	push(it, name, key, topic);
+	return (*this);
+}
+
 Channel::~Channel(void)
 {
 }
