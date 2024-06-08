@@ -32,7 +32,7 @@ class Channel
 	public:
 		Channel(void);
 		~Channel(void);
-		void						push(std::map<int, infoClient>::iterator it, std::string& name, std::string key, std::string topic);
+		void						push(std::map<int, infoClient>::iterator it, std::string& name, std::string key, std::string topic, std::string mode);
 		std::map<int, infoClient>&	getClients(void);
 		std::string					getName(void);
 		std::string                 getKey(void);

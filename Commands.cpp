@@ -48,7 +48,7 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		socket.ft_erase(fd);
 }
 
-void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channel)
+void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
 	(void)channel;
 	if (parse.getArgs().size() != 1)
@@ -156,7 +156,7 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					else
 					{
 						std::cout << "You have joined the channel" << std::endl;
-						channels.at(j).push(clients.find(fd.fd), channelNames[i], key, "No topic is set");
+						channels.at(j).push(clients.find(fd.fd), channelNames[i], key, "No topic is set", "@");
 						channels.push_back(channels.at(j).getChannel());
 						toSend(fd.fd, "You have joined the channel " + channelNames[i] + "\r\n");
 						toSend(fd.fd, channelNames[i] + " :" + channels.at(i).getTopic() + "\r\n");
@@ -190,7 +190,7 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		Channel	channel;
 		clients[fd.fd].mode = "@";
 		key = keys.size() <= i ? "" : keys[i];
-		channel.push(clients.find(fd.fd), channelNames[i], key, "No topic is set");
+		channel.push(clients.find(fd.fd), channelNames[i], key, "No topic is set", "@");
 		channels.push_back(channel.getChannel());
 		toSend(fd.fd, "You have joined the channel " + channel.getName() + "\r\n");
 		toSend(fd.fd, channel.getName() + " :" + channel.getTopic() + "\r\n");
