@@ -20,16 +20,15 @@ Channel::~Channel(void)
 {
 }
 
-void    Channel::push(std::map<int, infoClient>::iterator it, std::string& name, std::string key, std::string topic, std::string mode)
+void    Channel::push(std::map<int, std::string>::iterator it, std::string& name, std::string key, std::string topic)
 {
 	_clients.insert(*it);
 	_name = name;
 	_key = key;
 	_topic = topic;
-	_clients[it->first].mode = mode;
 }
 
-std::map<int, infoClient>&	Channel::getClients(void)
+std::map<int, std::string>&	Channel::getClients(void)
 {
 	return (this->_clients);
 }

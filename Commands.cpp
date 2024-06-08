@@ -119,11 +119,11 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 {
 	(void)socket;
 	(void)clients;
-	std::string 		channelName = parse.getArgs().at(0);
-	std::string 		key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
-	std::stringstream	nameStream(channelName);
-	std::stringstream	keyStream(key);
-	bool				check = 0;
+	std::string 				channelName = parse.getArgs().at(0);
+	std::string 				key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
+	std::stringstream			nameStream(channelName);
+	std::stringstream			keyStream(key);
+	bool						check = 0;
 	std::vector<std::string>	channelNames;
 	std::vector<std::string>	keys;
 
@@ -157,15 +157,17 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					else
 					{
 						std::cout << "You have joined the channel" << std::endl;
-						channels.at(j).push(clients.find(fd.fd), channelNames[i], key, "No topic is set", "@");
+						std::map<int, std::string>	client;
+						client[fd.fd] = "@";
+						channels.at(j).push(client.begin(), channelNames[i], key, "No topic is set");
 						channels.push_back(channels.at(j).getChannel());
 						toSend(fd.fd, "You have joined the channel " + channelNames[i] + "\r\n");
 						toSend(fd.fd, channelNames[i] + " :" + channels.at(i).getTopic() + "\r\n");
 						// send list of users in the channel (RPL_NAMREPLY)
 						std::string	listOfUsers;
-						for (std::map<int, infoClient>::iterator it = channels.at(j).getClients().begin(); it != channels.at(j).getClients().end();)
+						for (std::map<int, std::string>::iterator it = channels.at(j).getClients().begin(); it != channels.at(j).getClients().end();)
 						{
-							listOfUsers += it->second.mode + it->second.nickname;
+							listOfUsers += it->second + clients.find(it->first)->second.nickname;
 							++it;
 							if (it != channels.at(j).getClients().end())
 								listOfUsers += " ";
@@ -189,17 +191,18 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		// if channel does not exist
 		std::cout << "Channel does not exist" << std::endl;
 		Channel	channel;
-		clients[fd.fd].mode = "@";
 		key = keys.size() <= i ? "" : keys[i];
-		channel.push(clients.find(fd.fd), channelNames[i], key, "No topic is set", "@");
+		std::map<int, std::string>	client;
+		client[fd.fd] = "@";
+		channel.push(client.begin(), channelNames[i], key, "No topic is set");
 		channels.push_back(channel.getChannel());
 		toSend(fd.fd, "You have joined the channel " + channel.getName() + "\r\n");
 		toSend(fd.fd, channel.getName() + " :" + channel.getTopic() + "\r\n");
 		// send list of users in the channel (RPL_NAMREPLY)
 		std::string	listOfUsers;
-		for (std::map<int, infoClient>::iterator it = channel.getClients().begin(); it != channel.getClients().end();)
+		for (std::map<int, std::string>::iterator it = channel.getClients().begin(); it != channel.getClients().end();)
 		{
-			listOfUsers += it->second.mode + it->second.nickname;
+			listOfUsers += it->second + clients.find(it->first)->second.nickname;
 			++it;
 			if (it != channel.getClients().end())
 				listOfUsers += " ";
