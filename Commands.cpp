@@ -115,6 +115,16 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 }
 
+int	channelExists(std::vector<class Channel>& channels, std::string channelName)
+{
+	for (unsigned long int i = 0; i < channels.size(); i++)
+	{
+		if (channels.at(i).getName() == channelName)
+			return (i);
+	}
+	return (-1);
+}
+
 void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
 	(void)socket;
@@ -141,36 +151,58 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	for (std::map<std::string, std::string>::iterator it = ck.begin(); it != ck.end(); ++it)
 	{
 		std::cout << "Channel: " << it->first << " Key: " << it->second << std::endl;
-		std::map<std::string, std::string>::iterator	channel = ck.find(it->first);
-		if (channel != ck.end())
+		// std::map<std::string, std::string>::iterator	channel = ck.find(it->first);
+		int	i = channelExists(channels, it->first);
+		if (i != -1)
 		{
 			std::cout << "Channel exists" << std::endl;
-			// if channel requires a key
-			if (channel->second != "" && channel->second != "x")
+			// if key is correct
+			if (channels[i].getKey() == it->second || channels[i].getKey() == "")
 			{
-				std::cout << "Key is required" << std::endl;
-				if (channel->second == it->second)
-				{
-					std::cout << "Key is correct" << std::endl;
-				}
+				std::cout << "Key is correct" << std::endl;
+				// if client is already in the channel
+				if (channels[i].getClients().find(fd.fd) != channels[i].getClients().end())
+					toSend(fd.fd, "You are already in the channel\r\n");
+				// if client is not in the channel
 				else
 				{
-					std::cout << "Invalid key" << std::endl;
-					toSend(fd.fd, "Invalid key.\r\n");
+					std::cout << "You have joined the channel" << std::endl;
+					// add client to the channel
+					channels[i].push(fd.fd, "");
+					// send RPL_TOPIC
+					toSend(fd.fd, channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
+					// send list of users in the channel (RPL_NAMREPLY)
+					std::string	listOfUsers;
+					for (std::map<int, std::string>::iterator it = channels[i].getClients().begin(); it != channels[i].getClients().end();)
+					{
+						listOfUsers += it->second + clients.find(it->first)->second.nickname;
+						++it;
+						if (it != channels[i].getClients().end())
+							listOfUsers += " ";
+					}
+					toSend(fd.fd, channels[i].getName() + " :" + listOfUsers + "\r\n");
+					toSend(fd.fd, channels[i].getName() + " :" + "End of /NAMES list.\r\n");
 				}
 			}
-			// if channel does not require a key
+			// if key is wrong
 			else
 			{
-				std::cout << "Key is not required" << std::endl;
+				std::cout << "Invalid key" << std::endl;
+				toSend(fd.fd, "Invalid key.\r\n");
 			}
 		}
 		else
 		{
 			std::cout << "Channel does not exist" << std::endl;
-			Channel	c;
-			c.push(fd.fd, it->first, it->second, "No topic is set");
-			channels.push_back(Channel(it->first, it->second, "No topic is set"));
+			// create a new channel
+			Channel	c(fd.fd, it->first, it->second, "No topic is set", "@");
+			// add channel to the list of channels
+			channels.push_back(c.getChannel());
+			// send RPL_TOPIC
+			toSend(fd.fd, c.getName() + " :" + c.getTopic() + "\r\n");
+			// send list of users in the channel (RPL_NAMREPLY)
+			toSend(fd.fd, c.getName() + " :" + "@" + clients[fd.fd].nickname + "\r\n");
+			toSend(fd.fd, c.getName() + " :" + "End of /NAMES list.\r\n");
 		}
 	}
 }

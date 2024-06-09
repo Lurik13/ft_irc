@@ -16,27 +16,22 @@ Channel::Channel(void)
 {
 }
 
-Channel&	Channel::Channel(int fd, std::string name, std::string key, std::string topic, std::string mode)
+Channel::Channel(int fd, std::string name, std::string key, std::string topic, std::string mode)
 {
-	std::map<int, std::string>::iterator it;
-
-	it = _clients.begin();
-	it->first = fd;
-	it->second = mode;
-	push(it, name, key, topic);
-	return (*this);
+	_clients.clear();
+	_clients[fd] = mode;
+	_name = name;
+	_key = key;
+	_topic = topic;
 }
 
 Channel::~Channel(void)
 {
 }
 
-void    Channel::push(std::map<int, std::string>::iterator it, std::string& name, std::string key, std::string topic)
+void    Channel::push(int fd, std::string mode)
 {
-	_clients.insert(*it);
-	_name = name;
-	_key = key;
-	_topic = topic;
+	_clients[fd] = mode;
 }
 
 std::map<int, std::string>&	Channel::getClients(void)
@@ -62,6 +57,13 @@ std::string Channel::getTopic(void)
 Channel&	Channel::getChannel(void)
 {
 	return (*this);
+}
+
+bool	Channel::clientIsInChannel(int fd)
+{
+	if (_clients.find(fd) == _clients.end())
+		return (false);
+	return (true);
 }
 
 bool    isChannel(std::string str)
