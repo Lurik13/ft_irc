@@ -34,5 +34,6 @@ class Channel
 		std::string                 getKey(void);
 		std::string                 getTopic(void);
 		Channel&					getChannel(void);
+		void						pop(int fd);
 		bool						clientIsInChannel(int fd);
 };

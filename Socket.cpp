@@ -20,7 +20,7 @@ bool operator==(const pollfd& lhs, const pollfd& rhs) {
 
 std::string	Socket::getPassword() {return this->_password;}
 
-void	Socket::ft_erase(struct pollfd& fd)
+void	Socket::ft_erase(struct pollfd& fd, std::vector<class Channel>& channels)
 {
 	std::vector<struct pollfd>::iterator	it = std::find(this->_fds.begin(), this->_fds.end(), fd);
 
@@ -28,6 +28,15 @@ void	Socket::ft_erase(struct pollfd& fd)
 	this->_clients.erase(fd.fd);
 	close(fd.fd);
 	this->_fds.erase(it);
+	for (std::vector<class Channel>::iterator it = channels.begin(); it != channels.end();)
+	{
+		if (it->clientIsInChannel(fd.fd))
+			it->pop(fd.fd);
+		if (it->getClients().empty())
+			it = channels.erase(it);
+		else
+			it++;
+	}
 }
 
 Socket::Socket(void) {}
@@ -173,7 +182,7 @@ std::string	Socket::readClientSocket(struct pollfd& fd)
 		if (bytes != 0)
 			std::cout << RED << "Error: recv!" << std::endl;
 		// close the client file descriptor and remove it from the map and vector
-		ft_erase(fd);
+		ft_erase(fd, this->_channels);
 	}
 	else
 	{

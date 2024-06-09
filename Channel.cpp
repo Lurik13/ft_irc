@@ -66,6 +66,11 @@ bool	Channel::clientIsInChannel(int fd)
 	return (true);
 }
 
+void	Channel::pop(int fd)
+{
+	_clients.erase(fd);
+}
+
 bool    isChannel(std::string str)
 {
 	if (str.size() < 2 || str.size() > 50)
