@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/10 14:16:49 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/10 16:39:39 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,7 +196,7 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 						++it;
 						if (it != channels[i].getClients().end())
 							listOfUsers += " ";
-						toSend(fd.fd, ":" + clients.find(it->first)->second.nickname + "!" + clients.find(it->first)->second.username + "@" + clients.find(it->first)->second.hostname + " JOIN :" + channels[i].getName() + "\r\n");
+						// toSend(fd.fd, ":" + clients.find(it->first)->second.nickname + "!" + clients.find(it->first)->second.username + "@" + clients.find(it->first)->second.hostname + " JOIN :" + channels[i].getName() + "\r\n");
 
 						(void)clients.find(it->first)->second.nickname;
 						(void)clients.find(it->first)->second.username;

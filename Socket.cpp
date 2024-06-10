@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/10 11:21:22 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/10 16:36:34 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,7 @@ void	Socket::acceptClient(void)
 	memset(&infoClient, 0, sizeof(infoClient));
 	this->_clients[fd.fd] = infoClient;
 	this->_clients[fd.fd].ipv4 = csin;
+	this->_clients[fd.fd].nickname = "Guest";
 	char ip[INET_ADDRSTRLEN];
 	// inet_ntop converts the network address to a string
 	inet_ntop(AF_INET, &csin.sin_addr, ip, sizeof(ip));
