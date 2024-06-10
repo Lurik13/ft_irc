@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/10 16:36:34 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/10 16:49:28 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,11 +117,15 @@ void	Socket::acceptClient(void)
 	memset(&infoClient, 0, sizeof(infoClient));
 	this->_clients[fd.fd] = infoClient;
 	this->_clients[fd.fd].ipv4 = csin;
-	this->_clients[fd.fd].nickname = "Guest";
 	char ip[INET_ADDRSTRLEN];
 	// inet_ntop converts the network address to a string
 	inet_ntop(AF_INET, &csin.sin_addr, ip, sizeof(ip));
+	this->_clients[fd.fd].nickname = "Guest";
+	this->_clients[fd.fd].username = "Unknown";
+	this->_clients[fd.fd].servername = "ft_irc.com";
+	this->_clients[fd.fd].realname = "Unknown Guest";
 	this->_clients[fd.fd].hostname = ip;
+	this->_clients[fd.fd].mode = "@";
 	this->_clients[fd.fd].is_first = 1;
 	std::cout << GREEN << fd.fd << " connected!" << RESET << std::endl;
 }

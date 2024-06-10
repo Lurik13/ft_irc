@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:50:17 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/04 12:22:23 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/10 16:46:21 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 typedef struct infoClient
 {
 	struct sockaddr_in	ipv4;
-	std::string		password;
+	// std::string		password;
 	std::string		nickname;
 	std::string		username;
 	std::string		servername;
