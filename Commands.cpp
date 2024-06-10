@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/08 12:09:18 by marvin           ###   ########.fr       */
+/*   Updated: 2024/06/10 12:18:56 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,21 +53,22 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	(void)channels;
 	if (parse.getArgs().size() != 1)
 	{
-		if (send(fd.fd, "Usage: /NICK <nickname>\r\n", 26, 0) < 0)
-			throw Error::Exception("Error: send!");
+		toSend(fd.fd, "Usage: /NICK <nickname>\r\n");
 		socket.ft_erase(fd, channels);
 	}
 	else
 	{
-		// if (clients[fd.fd].nickname != "")
-		// {
-			// std::string toSend = ":" + clients[fd.fd].nickname + " NICK " + parse.getArgs().at(0) + "\r\n";
-			toSend(fd.fd, ":" + clients[fd.fd].nickname + " NICK " + parse.getArgs().at(0) + "\r\n");
-			// if (send(fd.fd, toSend.c_str(), toSend.size(), 0) < 0)
-			// 	throw Error::Exception("Error: send!");
-		// }
+		// if ()
+		for (std::map<int, infoClient>::iterator it = clients.begin(); it != clients.end(); ++it)
+		{
+			if (it->second.nickname == parse.getArgs().at(0))
+			{
+				toSend(fd.fd, ":ft_irc.com 433 " + it->second.nickname + " " + parse.getArgs().at(0) + " :Nickname is already in use\r\n");
+				return ;
+			}
+		}
+		toSend(fd.fd, ":" + clients[fd.fd].nickname + " NICK " + parse.getArgs().at(0) + "\r\n");
 		clients[fd.fd].nickname = parse.getArgs().at(0);
-		std::cout << "Nickname: " << clients[fd.fd].nickname << std::endl;
 	}
 }
 
@@ -180,8 +181,8 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					// send RPL_TOPIC
 					toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
 					// send list of users in the channel (RPL_NAMREPLY)
-					toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + listOfUsers + "\r\n");
-					toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + "End of /NAMES list.\r\n");
+					toSend(fd.fd, ":ft_irc.com 353 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + listOfUsers + "\r\n");
+					toSend(fd.fd, ":ft_irc.com 366 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + "End of /NAMES list.\r\n");
 				}
 			}
 			// if key is wrong
