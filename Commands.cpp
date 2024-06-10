@@ -177,6 +177,7 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 						++it;
 						if (it != channels[i].getClients().end())
 							listOfUsers += " ";
+						toSend(fd.fd, ":" + clients.find(it->first)->second.nickname + "!" + clients.find(it->first)->second.username + "@" + clients.find(it->first)->second.hostname + " JOIN :" + channels[i].getName() + "\r\n");
 					}
 					// send RPL_TOPIC
 					toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
@@ -189,7 +190,7 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 			else
 			{
 				std::cout << "Invalid key" << std::endl;
-				toSend(fd.fd, ":ft_irc.com 475 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + "Cannot join channel (+k)");
+				toSend(fd.fd, ":ft_irc.com 475 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + "Cannot join channel (+k)\r\n");
 			}
 		}
 		else
@@ -200,9 +201,10 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 			// add channel to the list of channels
 			channels.push_back(c.getChannel());
 			// send RPL_TOPIC
+			toSend(fd.fd, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " JOIN :" + c.getName() + "\r\n");
 			toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + c.getName() + " :" + c.getTopic() + "\r\n");
 			// send list of users in the channel (RPL_NAMREPLY)
-			toSend(fd.fd, ":ft_irc.com 353 " + clients[fd.fd].nickname + " " + c.getName() + " :" + "@" + clients[fd.fd].nickname + "\r\n");
+			toSend(fd.fd, ":ft_irc.com 353 " + clients[fd.fd].nickname + " " + c.getName() + " :@" + clients[fd.fd].nickname + "\r\n");
 			toSend(fd.fd, ":ft_irc.com 366 " + clients[fd.fd].nickname + " " + c.getName() + " :" + "End of /NAMES list.\r\n");
 		}
 	}

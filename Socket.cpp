@@ -116,7 +116,10 @@ void	Socket::acceptClient(void)
 	this->_clients[fd.fd].ipv4 = csin;
 	this->_clients[fd.fd].nickname = "";
 	this->_clients[fd.fd].username = "";
-	this->_clients[fd.fd].hostname = "";
+	char ip[INET_ADDRSTRLEN];
+	// inet_ntop converts the network address to a string
+	inet_ntop(AF_INET, &csin.sin_addr, ip, sizeof(ip));
+	this->_clients[fd.fd].hostname = ip;
 	this->_clients[fd.fd].password = "";
 	this->_clients[fd.fd].is_first = 1;
 	std::cout << GREEN << fd.fd << " connected!" << RESET << std::endl;
