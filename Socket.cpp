@@ -61,10 +61,8 @@ Socket::Socket(in_addr_t addr, in_port_t port, sa_family_t family, std::string p
 		throw Error::Exception("Error: socket!");
 	}
 	this->_fds.push_back(fd);
+	memset(&this->_clients, 0, sizeof(this->_clients));
 	this->_clients[fd.fd].ipv4 = this->_ipv4;
-	this->_clients[fd.fd].nickname = "";
-	this->_clients[fd.fd].username = "";
-	this->_clients[fd.fd].hostname = "";
 	// ---- ( TEMPORAIRE ) fd2 : stdin ----
 	pollfd	fd2;
 	fd2.fd = 0;
@@ -113,14 +111,12 @@ void	Socket::acceptClient(void)
 	if (fd.fd < 0)
 		throw Error::Exception("Error: cannot to connect the client!");
 	this->_fds.push_back(fd);
+	memset(&this->_clients[fd.fd], 0, sizeof(this->_clients[fd.fd]));
 	this->_clients[fd.fd].ipv4 = csin;
-	this->_clients[fd.fd].nickname = "";
-	this->_clients[fd.fd].username = "";
 	char ip[INET_ADDRSTRLEN];
 	// inet_ntop converts the network address to a string
 	inet_ntop(AF_INET, &csin.sin_addr, ip, sizeof(ip));
 	this->_clients[fd.fd].hostname = ip;
-	this->_clients[fd.fd].password = "";
 	this->_clients[fd.fd].is_first = 1;
 	std::cout << GREEN << fd.fd << " connected!" << RESET << std::endl;
 }
