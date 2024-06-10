@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/10 12:18:56 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/10 14:16:49 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,17 +48,36 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		socket.ft_erase(fd, channels);
 }
 
+// for (Channel& channel : user.channels) {
+// 	for (User& channelUser : channel.users) {
+// 		if (channelUser != user) {
+// 			sendNotification(channelUser, oldNickname + " a changé son pseudo en " + newNickname);
+// 		}
+// 	}
+// }
+
+bool isACorrectNickname(std::string name)
+{
+	if (name.size() == 0 || name.size() > 9)
+		return (0);
+	std::string allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789|_{}[]";
+	for (int i = 0; name[i]; i++)
+	{
+		if (allowed.find(name[i]) == std::string::npos)
+			return (0);
+	}
+	return (1);
+}
 void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
 	(void)channels;
+	(void)socket;
 	if (parse.getArgs().size() != 1)
-	{
 		toSend(fd.fd, "Usage: /NICK <nickname>\r\n");
-		socket.ft_erase(fd, channels);
-	}
+	else if (!isACorrectNickname(parse.getArgs().at(0)))
+		toSend(fd.fd, ":ft_irc.com 432 " + parse.getArgs().at(0) + " :Erroneus nickname\r\n");
 	else
 	{
-		// if ()
 		for (std::map<int, infoClient>::iterator it = clients.begin(); it != clients.end(); ++it)
 		{
 			if (it->second.nickname == parse.getArgs().at(0))
