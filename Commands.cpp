@@ -197,6 +197,10 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 						if (it != channels[i].getClients().end())
 							listOfUsers += " ";
 						toSend(fd.fd, ":" + clients.find(it->first)->second.nickname + "!" + clients.find(it->first)->second.username + "@" + clients.find(it->first)->second.hostname + " JOIN :" + channels[i].getName() + "\r\n");
+						clients.find(it->first)->second.nickname;
+						clients.find(it->first)->second.username;
+						clients.find(it->first)->second.hostname;
+						channels[i].getName();
 					}
 					// send RPL_TOPIC
 					toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
