@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/10 16:39:39 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/10 19:01:13 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,14 +48,6 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		socket.ft_erase(fd, channels);
 }
 
-// for (Channel& channel : user.channels) {
-// 	for (User& channelUser : channel.users) {
-// 		if (channelUser != user) {
-// 			sendNotification(channelUser, oldNickname + " a changé son pseudo en " + newNickname);
-// 		}
-// 	}
-// }
-
 bool isACorrectNickname(std::string name)
 {
 	if (name.size() == 0 || name.size() > 9)
@@ -68,6 +60,14 @@ bool isACorrectNickname(std::string name)
 	}
 	return (1);
 }
+
+// for (Channel& channel : user.channels) {
+// 	for (User& channelUser : channel.users) {
+// 		if (channelUser != user) {
+// 			sendNotification(channelUser, oldNickname + " a changé son pseudo en " + newNickname);
+// 		}
+// 	}
+// }
 void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
 	(void)channels;
@@ -193,10 +193,10 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					for (std::map<int, std::string>::iterator it = channels[i].getClients().begin(); it != channels[i].getClients().end();)
 					{
 						listOfUsers += it->second + clients.find(it->first)->second.nickname;
+						toSend(fd.fd, ":" + clients.find(it->first)->second.nickname + "!" + clients.find(it->first)->second.username + "@" + clients.find(it->first)->second.hostname + " JOIN :" + channels[i].getName() + "\r\n");
 						++it;
 						if (it != channels[i].getClients().end())
 							listOfUsers += " ";
-						// toSend(fd.fd, ":" + clients.find(it->first)->second.nickname + "!" + clients.find(it->first)->second.username + "@" + clients.find(it->first)->second.hostname + " JOIN :" + channels[i].getName() + "\r\n");
 
 						(void)clients.find(it->first)->second.nickname;
 						(void)clients.find(it->first)->second.username;
