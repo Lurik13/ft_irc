@@ -61,7 +61,7 @@ Socket::Socket(in_addr_t addr, in_port_t port, sa_family_t family, std::string p
 		throw Error::Exception("Error: socket!");
 	}
 	this->_fds.push_back(fd);
-	memset(&this->_clients, 0, sizeof(this->_clients));
+	memset(&this->_clients[fd.fd], 0, sizeof(this->_clients[fd.fd]));
 	this->_clients[fd.fd].ipv4 = this->_ipv4;
 	// ---- ( TEMPORAIRE ) fd2 : stdin ----
 	pollfd	fd2;
