@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:09 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/03 21:54:16 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/11 12:01:37 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,11 @@ std::string Channel::getTopic(void)
 Channel&	Channel::getChannel(void)
 {
 	return (*this);
+}
+
+void	Channel::setTopic(std::string topic)
+{
+	this->_topic = topic;
 }
 
 bool	Channel::clientIsInChannel(int fd)

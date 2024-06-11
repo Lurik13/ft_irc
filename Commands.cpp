@@ -6,18 +6,11 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/10 19:01:13 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/11 12:10:29 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Commands.hpp"
-
-void	toSend(int fd, std::string str)
-{
-	std::cout << MAGENTA << str << RESET << std::endl;
-	if (send(fd, str.c_str(), str.size(), 0) < 0)
-		throw Error::Exception("Error: send!");
-}
 
 void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
@@ -32,13 +25,7 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 	
 	//On concatene tous les arguments au cas ou le serveur ait demande un mot de passe avec des espaces
-	std::string password = "";
-	for (unsigned long i = 0; i < parse.getArgs().size(); i++)
-	{
-		password += parse.getArgs().at(i);
-		if (i + 1 < parse.getArgs().size())
-			password += " ";
-	}
+	std::string password = getAllArgs(0, parse);
 	if (password != socket.getPassword())
 	{
 		toSend(fd.fd, "Invalid password!\r\n");
@@ -46,19 +33,6 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 	if (error == 1)
 		socket.ft_erase(fd, channels);
-}
-
-bool isACorrectNickname(std::string name)
-{
-	if (name.size() == 0 || name.size() > 9)
-		return (0);
-	std::string allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789|_{}[]";
-	for (int i = 0; name[i]; i++)
-	{
-		if (allowed.find(name[i]) == std::string::npos)
-			return (0);
-	}
-	return (1);
 }
 
 // for (Channel& channel : user.channels) {
@@ -133,16 +107,6 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	{
 		toSend(fd.fd, "Usage: /PING <server>\r\n");
 	}
-}
-
-int	channelExists(std::vector<class Channel>& channels, std::string channelName)
-{
-	for (unsigned long int i = 0; i < channels.size(); i++)
-	{
-		if (channels.at(i).getName() == channelName)
-			return (i);
-	}
-	return (-1);
 }
 
 void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
@@ -221,7 +185,7 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		{
 			std::cout << "Channel does not exist" << std::endl;
 			// create a new channel
-			Channel	c(fd.fd, it->first, it->second, "No topic is set", "@");
+			Channel	c(fd.fd, it->first, it->second, "No topic is set.", "@");
 			// add channel to the list of channels
 			channels.push_back(c.getChannel());
 			// send RPL_TOPIC
@@ -346,18 +310,40 @@ void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	// (void)parse;
+	// 6> TOPIC #yo :t
+	// 3< :zirconium.libera.chat 482 bonsoir #yo :You're not a channel operator
+	// 6> TOPIC #reg :wrgiuheg rieh erih re
+	// 3< :bonsoir!~lribette@81.255.67.28 TOPIC #reg :wrgiuheg rieh erih re
+	
 	(void)socket;
-	(void)fd;
-	(void)clients;
-	(void)channels;
-	// std::cout << MAGENTA << "TOPIC" << parse.getArgs().at(0) << std::endl;
-	if (parse.getArgs().size() == 1 || parse.getArgs().size() == 2)
+
+	if (parse.getArgs().size() == 0)
+		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " TOPIC :Not enough parameters\r\n");
+	else if (parse.getArgs().at(0)[0] != '#') //inutile ?
+		toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :No such channel\r\n");
+	else
 	{
-		// std::string toSend = "PONG " + clients[fd.fd].servername + " :" + parse.getArgs().at(0) + "\r\n";
-		toSend(fd.fd, "TOPIC " + parse.getArgs().at(0) + "\r\n");
+		int	i = channelExists(channels, parse.getArgs().at(0));
+		if (i == -1)
+			toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :No such channel\r\n");
+		else
+		{
+			if (parse.getArgs().size() == 1 && channels[i].getTopic() == "No topic is set.")
+				toSend(fd.fd, ":ft_irc.com 331 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :No topic is set.\r\n");
+			else if (parse.getArgs().size() > 1)
+			{
+				if (!channels[i].clientIsInChannel(fd.fd))
+					toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :You're not on that channel\r\n");
+				else
+				{
+					// FAIRE LE SYSTEME DE MODES
+					channels[i].setTopic(getAllArgs(1, parse));
+					toSend(fd.fd, ":" + clients[fd.fd].nickname + " TOPIC " + parse.getArgs().at(0) + " :" + channels[i].getTopic() + "\r\n");
+					// ENVOYER A TOUS LES AUTRES CLIENTS DU CHANNEL
+				}
+			}
+		}
 	}
-	// if (parse.getArgs())
 }
 
 void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
@@ -369,10 +355,9 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 	while (parse.getCmd() != cmdptr[i])
 	{
 		i++;
-		if (i > 6)
+		if (i > 7)
 			return ;
 	}
-	std::cout << "Nickname: " << clients[fd.fd].nickname << std::endl;
 	(*fxptr[i])(parse, socket, fd, clients, channels);
 }
 

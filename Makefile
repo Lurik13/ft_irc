@@ -6,7 +6,7 @@
 #    By: lribette <lribette@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/29 18:16:19 by lribette          #+#    #+#              #
-#    Updated: 2024/05/31 11:02:27 by lribette         ###   ########.fr        #
+#    Updated: 2024/06/11 11:42:22 by lribette         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ FLAGS += -Wall -Wextra -Werror -g -std=c++98
 # ----------------------------- Sources ----------------------------- #
 
 NAME = ircserv
-FILES = server Socket Parse Commands Channel
+FILES = server Socket Parse Commands CommandsUtils Channel
 
 SRCS = $(addsuffix .cpp, $(FILES))
 OBJS = $(addsuffix .o, $(FILES))

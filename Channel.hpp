@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:05 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/08 12:06:56 by marvin           ###   ########.fr       */
+/*   Updated: 2024/06/11 12:00:57 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ class Channel
 		std::map<int, std::string>	_clients;
 		std::string					_name;
 		std::string                 _key;
-		std::string                 _topic; // topic du channel (EST-CE QUE C'EST UNE STRING LE TOPIC?)
+		std::string                 _topic;
 	public:
 		Channel(void);
 		Channel(int fd, std::string name, std::string key, std::string topic, std::string mode);
@@ -34,6 +34,7 @@ class Channel
 		std::string                 getKey(void);
 		std::string                 getTopic(void);
 		Channel&					getChannel(void);
+		void						setTopic(std::string topic);
 		void						pop(int fd);
 		bool						clientIsInChannel(int fd);
 };

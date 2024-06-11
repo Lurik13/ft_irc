@@ -35,7 +35,7 @@ includes JOIN, MODE, KICK, PART, QUIT and of course PRIVMSG/NOTICE.
 This allows channel members to keep track of the other channel members, as well as channel modes.
 
 RPL_TOPIC
-<channel>: No topic is set
+<channel>: No topic is set.
 <channel>: <topic>
 
 
