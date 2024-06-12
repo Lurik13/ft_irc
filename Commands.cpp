@@ -167,7 +167,7 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					// send RPL_TOPIC
 					toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
 					// send list of users in the channel (RPL_NAMREPLY)
-					toSend(fd.fd, ":ft_irc.com 353 " + clients[fd.fd].nickname + " @ " + channels[i].getName() + " :" + listOfUsers + "\r\n");
+					toSend(fd.fd, ":ft_irc.com 353 " + clients[fd.fd].nickname + " = " + channels[i].getName() + " :" + listOfUsers + "\r\n");
 					toSend(fd.fd, ":ft_irc.com 366 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + "End of /NAMES list.\r\n");
 				}
 			}
@@ -319,14 +319,20 @@ void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 				toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + channelNames[i] + " :No such channel\r\n");
 			else
 			{
-				if (!channels[i].clientIsInChannel(fd.fd))
-					toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + channelNames[i] + " :You're not on that channel\r\n");
-				else
-				{
-					// FAIRE LE SYSTEME DE MODES
-					channels[j].pop(fd.fd);
-					// ENVOYER A TOUS LES AUTRES CLIENTS DU CHANNEL
-					toSend(fd.fd, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PART " + channelNames[i] + " :Goodbye\r\n");
+				if (!channels[j].clientIsInChannel(fd.fd))
+                    toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + channelNames[i] + " :You're not on that channel\r\n");
+                else
+                {
+                    // FAIRE LE SYSTEME DE MODES
+                    std::string reason = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "Goodbye";
+                    // ENVOYER A TOUS LES AUTRES CLIENTS DU CHANNEL
+                    for (std::map<int, std::string>::iterator it = channels[j].getClients().begin(); it != channels[j].getClients().end(); ++it)
+                    {   
+                        toSend(it->first, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PART " + channelNames[i] + " :" + reason + "\r\n");
+                    }
+                    channels[j].pop(fd.fd);
+                    if (channels[j].isEmpty())
+                        channels.erase(channels.begin() + j);
 				}
 			}
 		}

@@ -22,12 +22,6 @@ std::string	Socket::getPassword() {return this->_password;}
 
 void	Socket::ft_erase(struct pollfd& fd, std::vector<class Channel>& channels)
 {
-	std::vector<struct pollfd>::iterator	it = std::find(this->_fds.begin(), this->_fds.end(), fd);
-
-	std::cout << BLUE << fd.fd << " disconnected!" << RESET << std::endl;
-	this->_clients.erase(fd.fd);
-	close(fd.fd);
-	this->_fds.erase(it);
 	for (std::vector<class Channel>::iterator it = channels.begin(); it != channels.end();)
 	{
 		if (it->clientIsInChannel(fd.fd))
@@ -37,6 +31,11 @@ void	Socket::ft_erase(struct pollfd& fd, std::vector<class Channel>& channels)
 		else
 			it++;
 	}
+	std::vector<struct pollfd>::iterator	it = std::find(this->_fds.begin(), this->_fds.end(), fd);
+	std::cout << BLUE << fd.fd << " disconnected!" << RESET << std::endl;
+	this->_clients.erase(fd.fd);
+	close(fd.fd);
+	this->_fds.erase(it);
 }
 
 Socket::Socket(void) {}

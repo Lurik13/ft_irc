@@ -76,6 +76,13 @@ void	Channel::pop(int fd)
 	_clients.erase(fd);
 }
 
+bool	Channel::isEmpty(void)
+{
+	if (_clients.empty())
+		return (true);
+	return (false);
+}
+
 bool    isChannel(std::string str)
 {
 	if (str.size() < 2 || str.size() > 50)

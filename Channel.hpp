@@ -37,5 +37,6 @@ class Channel
 		Channel&					getChannel(void);
 		void						setTopic(std::string topic);
 		void						pop(int fd);
+		bool						isEmpty(void);
 		bool						clientIsInChannel(int fd);
 };
