@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/12 13:23:58 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/12 18:07:56 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		}
 		toSend(fd.fd, ":" + clients[fd.fd].nickname + " NICK " + parse.getArgs().at(0) + "\r\n");
 		clients[fd.fd].nickname = parse.getArgs().at(0);
+		clients[fd.fd].has_a_good_nickname = 1;
 	}
 }
 
@@ -389,7 +390,8 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 		if (i > 7)
 			return ;
 	}
-	(*fxptr[i])(parse, socket, fd, clients, channels);
+	if (hasAGoodNickname(parse, socket, fd, clients, channels, cmdptr[i]))
+		(*fxptr[i])(parse, socket, fd, clients, channels);
 }
 
 // CAP, NICK, USER, QUIT, PING, WHOIS, PASS, JOIN, "WHO", "PART", "LUSERS", "MOTD", "PRIVMSG"

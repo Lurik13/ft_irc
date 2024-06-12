@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:50:17 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/10 18:31:29 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/12 17:42:06 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ typedef struct infoClient
 	std::string		hostname;
 	std::string		mode;
 	bool			is_first;
+	bool			has_a_good_nickname;
 	std::vector<std::string>	channels;
 	// std::string		channel;
 }				infoClient;
