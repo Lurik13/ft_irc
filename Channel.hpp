@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:05 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/11 12:00:57 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/12 12:15:11 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Channel
 		std::string					_name;
 		std::string                 _key;
 		std::string                 _topic;
+		// int							_nb_max_of_clients;
 	public:
 		Channel(void);
 		Channel(int fd, std::string name, std::string key, std::string topic, std::string mode);

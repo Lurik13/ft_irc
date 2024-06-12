@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/11 12:10:29 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/12 13:23:58 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,15 +157,17 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					for (std::map<int, std::string>::iterator it = channels[i].getClients().begin(); it != channels[i].getClients().end();)
 					{
 						listOfUsers += it->second + clients.find(it->first)->second.nickname;
-						toSend(it->first, ":" + clients.find(it->first)->second.nickname + "!" + clients.find(it->first)->second.username + "@" + clients.find(it->first)->second.hostname + " JOIN :" + channels[i].getName() + "\r\n");
+						if (it->first != fd.fd)
+							toSend(it->first, ":" + clients[fd.fd].nickname + "!~" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " JOIN " + channels[i].getName() + "\r\n");
 						++it;
 						if (it != channels[i].getClients().end())
 							listOfUsers += " ";
 					}
+					toSend(fd.fd, ":" + clients[fd.fd].nickname + "!~" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " JOIN " + channels[i].getName() + "\r\n");
 					// send RPL_TOPIC
 					toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
 					// send list of users in the channel (RPL_NAMREPLY)
-					toSend(fd.fd, ":ft_irc.com 353 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + listOfUsers + "\r\n");
+					toSend(fd.fd, ":ft_irc.com 353 " + clients[fd.fd].nickname + " @ " + channels[i].getName() + " :" + listOfUsers + "\r\n");
 					toSend(fd.fd, ":ft_irc.com 366 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + "End of /NAMES list.\r\n");
 				}
 			}
@@ -184,10 +186,10 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 			// add channel to the list of channels
 			channels.push_back(c.getChannel());
 			// send RPL_TOPIC
-			toSend(fd.fd, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " JOIN :" + c.getName() + "\r\n");
+			toSend(fd.fd, ":" + clients[fd.fd].nickname + "!~" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " JOIN " + c.getName() + "\r\n");
 			toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + c.getName() + " :" + c.getTopic() + "\r\n");
 			// send list of users in the channel (RPL_NAMREPLY)
-			toSend(fd.fd, ":ft_irc.com 353 " + clients[fd.fd].nickname + " " + c.getName() + " :@" + clients[fd.fd].nickname + "\r\n");
+			toSend(fd.fd, ":ft_irc.com 353 " + clients[fd.fd].nickname + " = " + c.getName() + " :@" + clients[fd.fd].nickname + "\r\n");
 			toSend(fd.fd, ":ft_irc.com 366 " + clients[fd.fd].nickname + " " + c.getName() + " :" + "End of /NAMES list.\r\n");
 		}
 	}
