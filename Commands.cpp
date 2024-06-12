@@ -157,15 +157,10 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					for (std::map<int, std::string>::iterator it = channels[i].getClients().begin(); it != channels[i].getClients().end();)
 					{
 						listOfUsers += it->second + clients.find(it->first)->second.nickname;
-						toSend(fd.fd, ":" + clients.find(it->first)->second.nickname + "!" + clients.find(it->first)->second.username + "@" + clients.find(it->first)->second.hostname + " JOIN :" + channels[i].getName() + "\r\n");
+						toSend(it->first, ":" + clients.find(it->first)->second.nickname + "!" + clients.find(it->first)->second.username + "@" + clients.find(it->first)->second.hostname + " JOIN :" + channels[i].getName() + "\r\n");
 						++it;
 						if (it != channels[i].getClients().end())
 							listOfUsers += " ";
-
-						(void)clients.find(it->first)->second.nickname;
-						(void)clients.find(it->first)->second.username;
-						(void)clients.find(it->first)->second.hostname;
-						(void)channels[i].getName();
 					}
 					// send RPL_TOPIC
 					toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
@@ -301,11 +296,39 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	(void)parse;
 	(void)socket;
-	(void)fd;
-	(void)clients;
-	(void)channels;
+
+	if (parse.getArgs().size() == 0)
+		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " PART :Not enough parameters\r\n");
+	else
+	{
+		std::string					channelName = parse.getArgs().at(0);
+		std::stringstream			nameStream(channelName);
+		std::vector<std::string>	channelNames;
+
+		while (std::getline(nameStream, channelName, ','))
+			channelNames.push_back(channelName);
+		for (unsigned long int i = 0; i < channelNames.size(); i++)
+		{
+			int	j = channelExists(channels, channelNames[i]);
+			if (j == -1)
+				toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + channelNames[i] + " :No such channel\r\n");
+			else if (channelNames[i][0] != '#')
+				toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + channelNames[i] + " :No such channel\r\n");
+			else
+			{
+				if (!channels[i].clientIsInChannel(fd.fd))
+					toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + channelNames[i] + " :You're not on that channel\r\n");
+				else
+				{
+					// FAIRE LE SYSTEME DE MODES
+					channels[j].pop(fd.fd);
+					// ENVOYER A TOUS LES AUTRES CLIENTS DU CHANNEL
+					toSend(fd.fd, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PART " + channelNames[i] + " :Goodbye\r\n");
+				}
+			}
+		}
+	}
 }
 
 void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
@@ -314,12 +337,12 @@ void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCl
 	// 3< :zirconium.libera.chat 482 bonsoir #yo :You're not a channel operator
 	// 6> TOPIC #reg :wrgiuheg rieh erih re
 	// 3< :bonsoir!~lribette@81.255.67.28 TOPIC #reg :wrgiuheg rieh erih re
-	
+
 	(void)socket;
 
 	if (parse.getArgs().size() == 0)
 		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " TOPIC :Not enough parameters\r\n");
-	else if (parse.getArgs().at(0)[0] != '#') //inutile ?
+	else if (parse.getArgs().at(0)[0] != '#') // inutile ?
 		toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :No such channel\r\n");
 	else
 	{
@@ -338,8 +361,8 @@ void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCl
 				{
 					// FAIRE LE SYSTEME DE MODES
 					channels[i].setTopic(getAllArgs(1, parse));
-					toSend(fd.fd, ":" + clients[fd.fd].nickname + " TOPIC " + parse.getArgs().at(0) + " :" + channels[i].getTopic() + "\r\n");
 					// ENVOYER A TOUS LES AUTRES CLIENTS DU CHANNEL
+					toSend(fd.fd, ":" + clients[fd.fd].nickname + " TOPIC " + parse.getArgs().at(0) + " :" + channels[i].getTopic() + "\r\n");
 				}
 			}
 		}
