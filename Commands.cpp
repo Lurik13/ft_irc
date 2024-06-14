@@ -113,12 +113,10 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
 	(void)socket;
-	(void)clients;
-	(void)channels;
-	std::string 				channelName = parse.getArgs().at(0);
-	std::string 				key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
-	std::stringstream			nameStream(channelName);
-	std::stringstream			keyStream(key);
+	std::string 						channelName = parse.getArgs().at(0);
+	std::string 						key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
+	std::stringstream					nameStream(channelName);
+	std::stringstream					keyStream(key);
 	std::map<std::string, std::string>	ck;
 
 	if (parse.getArgs().size() == 0 || parse.getArgs().size() > 2)
@@ -141,8 +139,11 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		if (i != -1)
 		{
 			std::cout << "Channel exists" << std::endl;
+			// if (channel is invite only)
+			if (channels[i].getIsInviteOnly())
+				toSend(fd.fd, ":ft_irc.com 473 " + clients[fd.fd].nickname + " " + channelName + " :Cannot join channel (+i)\r\n");
 			// if key is correct
-			if (channels[i].getKey() == it->second || channels[i].getKey() == "")
+			else if (channels[i].getKey() == it->second || channels[i].getKey() == "")
 			{
 				std::cout << "Key is correct" << std::endl;
 				// if client is already in the channel
@@ -373,16 +374,54 @@ void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 }
 
+void	invite(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
+{
+	(void)socket;
+	if (parse.getArgs().size() != 2)
+		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " INVITE :Not enough parameters\r\n");
+	else
+	{
+		std::string		nickname = parse.getArgs().at(0);
+		std::string		channelName = parse.getArgs().at(1);
+		int				i = channelExists(channels, channelName);
+		if (i == -1)
+			toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + channelName + " :No such channel\r\n");
+		else
+		{
+			if (!channels[i].clientIsInChannel(fd.fd))
+				toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + channelName + " :You're not on that channel\r\n");
+			else if (channels[i].clientIsInChannel(clients, nickname))
+				toSend(fd.fd, ":ft_irc.com 443 " + clients[fd.fd].nickname + " " + nickname + " " + channelName + " :is already on channel\r\n");
+			// if channel is in mode +i and if client is not an operator
+			else if (channels[i].getClients().find(fd.fd)->second.name != "@")
+				toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channelName + " :You're not a channel operator\r\n");
+			// IF CHANNEL IS 
+			else
+			{
+				for (std::map<int, infoClient>::iterator it = clients.begin(); it != clients.end(); ++it)
+				{
+					if (it->second.nickname == nickname)
+					{
+						toSend(it->first, ":" + clients[fd.fd].nickname + " INVITE " + nickname + " " + channelName + "\r\n");
+						return ;
+					}
+				}
+				toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + nickname + " :No such nick/channel\r\n");
+			}
+		}
+	}
+}
+
 void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
 	size_t		i = 0;
-	std::string	cmdptr[] = {"PASS", "NICK", "USER", "QUIT", "PING", "JOIN", "PART", "TOPIC", "PRIVMSG", "MODE"};
-	void		(*fxptr[])(Parse&, Socket&, struct pollfd&, std::map<int, infoClient>&, std::vector<class Channel>&) = {pass, nick, user, quit, ping, join, part, topic, privmsg, mode};
+	std::string	cmdptr[] = {"PASS", "NICK", "USER", "QUIT", "PING", "JOIN", "PART", "TOPIC", "PRIVMSG", "MODE", "INVITE"};
+	void		(*fxptr[])(Parse&, Socket&, struct pollfd&, std::map<int, infoClient>&, std::vector<class Channel>&) = {pass, nick, user, quit, ping, join, part, topic, privmsg, mode, invite};
 
 	while (parse.getCmd() != cmdptr[i])
 	{
 		i++;
-		if (i > 9)
+		if (i > 10)
 			return ;
 	}
 	if (hasAGoodNickname(parse, socket, fd, clients, channels, cmdptr[i]))

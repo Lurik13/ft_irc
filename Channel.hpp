@@ -15,6 +15,8 @@
 #include "Socket.hpp"
 #include "server.hpp"
 
+struct infoClient;
+
 typedef struct clientData
 {
 	std::string	name;
@@ -50,4 +52,5 @@ class Channel
 		void						pop(int fd);
 		bool						isEmpty(void);
 		bool						clientIsInChannel(int fd);
+		bool						clientIsInChannel(const std::map<int, infoClient>& clients, std::string nickname);
 };

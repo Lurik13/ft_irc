@@ -102,6 +102,16 @@ bool	Channel::clientIsInChannel(int fd)
 	return (true);
 }
 
+bool	Channel::clientIsInChannel(const std::map<int, infoClient>& clients, std::string nickname)
+{
+	for (std::map<int, clientData>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (clients.find(it->first)->second.nickname == nickname)
+			return (true);
+	}
+	return (false);
+}
+
 void	Channel::pop(int fd)
 {
 	_clients.erase(fd);
