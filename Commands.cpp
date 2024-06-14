@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/13 23:48:39 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/14 14:25:33 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -333,42 +333,6 @@ void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, info
 					}
 				}
 				toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + targetName + " :No such nick/channel\r\n");
-			}
-		}
-	}
-}
-
-// — i : Définir/supprimer le canal sur invitation uniquement
-// — t : Définir/supprimer les restrictions de la commande TOPIC pour les opérateurs de canaux
-// — k : Définir/supprimer la clé du canal (mot de passe)
-// — o : Donner/retirer le privilège de l’opérateur de canal
-// — l : Définir/supprimer la limite d’utilisateurs pour le canal
-void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
-{
-	(void)socket;
-	if (parse.getArgs().size() == 0)
-		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " MODE :Not enough parameters\r\n");
-	else
-	{
-		if (parse.getArgs().at(0) == "Guest" || parse.getArgs().at(0) == clients[fd.fd].nickname)
-			return ;
-		int	i = channelExists(channels, parse.getArgs().at(0));
-		if (i == -1)
-			toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :No such channel\r\n");
-		else
-		{
-			if (parse.getArgs().size() == 1)
-			{
-				std::string allModes = " " + getMode('i', channels[i], fd.fd) + getMode('t', channels[i], fd.fd) + getMode('k', channels[i], fd.fd) + getMode('o', channels[i], fd.fd) + getMode('l', channels[i], fd.fd);
-				std::cout << GREEN << allModes << RESET << std::endl;
-				toSend(fd.fd, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " MODE " + channels[i].getName() + allModes + "\r\n");
-			}
-			else if (parse.getArgs().size() > 1)
-			{
-				char isValid = isAValidMode(parse.getArgs().at(0));
-				if (isValid != '\0')
-					if (isValid != SIGN_MISSING)
-						toSend(fd.fd, ":ft_irc.com 472 " + clients[fd.fd].nickname + " " + isValid + " :is unknown mode char to me\r\n");
 			}
 		}
 	}

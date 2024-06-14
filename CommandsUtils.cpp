@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 11:40:11 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/13 23:10:54 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/14 10:42:56 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,56 +66,4 @@ bool	hasAGoodNickname(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 		return (0);
 	}
 	return (1);
-}
-
-std::string	getMode(char mode, Channel channel, int fd)
-{
-	std::string result = "";
-	if (mode == 'i')
-	{
-		if (channel.getIsInviteOnly() == 0)
-			return ("-i");
-		return ("+i");
-	}
-	else if (mode == 't')
-	{
-		if (channel.getCanDefineTopic(fd) == 0)
-			return ("-t");
-		return ("+t");
-	}
-	else if (mode == 'k')
-	{
-		if (channel.getKey() == "")
-			return ("-k");
-		return ("+k");
-	}
-	else if (mode == 'o')
-	{
-		if (channel.getCanGiveOp(fd) == 0)
-			return ("-o");
-		return ("+o");
-	}
-	else //if (mode == 'l')
-	{
-		if (channel.getNbMaxOfClients() == 2147483647)
-			return ("-l");
-		return ("+l");
-	}
-}
-
-char	isAValidMode(std::string str)
-{
-	std::string allowedChars = "itkol+-";
-	if (str[0] != '+' || str[0] != '-')
-		return (SIGN_MISSING);
-	int i = 1;
-	while (str[i])
-	{
-		if (allowedChars.find(str[i]) == std::string::npos)
-			return (str[i]);
-		i++;
-	}
-	if (str[i] == '+' || str[i] == '-')
-		return (SIGN_MISSING);
-	return ('\0');
 }

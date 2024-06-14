@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/13 17:48:45 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/14 10:23:14 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,29 +139,11 @@ infoClient	Socket::registration(struct pollfd& fd, infoClient& client)
 		std::string version = "1.0";
 		std::string datetime = "2024/05/25 10:26:37";
 
-		std::string bleu = "\e[38;2;0;120;170;1m";
-		// send(fd.fd, bleu.c_str(), bleu.size(), 0);
-		
-		std::string welcome = "001 " + client.nickname + " :Welcome to the " + server + " Network, " + client.nickname + "[!" + client.username + "@" + client.hostname + "]\r\n";
-		if (send(fd.fd, welcome.c_str(), welcome.size(), 0) < 0)
-			throw Error::Exception("Error: send!");
-		
-		std::string yourhost = "002 " + client.nickname + " :Your host is " + server + ", running version 1.0\r\n";
-		if (send(fd.fd, yourhost.c_str(), yourhost.size(), 0) < 0)
-			throw Error::Exception("Error: send!");
-		
-		std::string created = "003 " + client.nickname + " :This server was created " + datetime + "\r\n";
-		if (send(fd.fd, created.c_str(), created.size(), 0) < 0)
-			throw Error::Exception("Error: send!");
-		
-		std::string myinfo = "004 " + client.nickname + " :There are 1 users and 0 services on 1 servers (PENSER A MODIFIER)\r\n";
-		if (send(fd.fd, myinfo.c_str(), myinfo.size(), 0) < 0)
-			throw Error::Exception("Error: send!");
-
-		std::string isupport = "005 " + client.nickname + " :The channels must begin with a '#'.\r\nNicklen = 30\r\n";
-		if (send(fd.fd, isupport.c_str(), isupport.size(), 0) < 0)
-			throw Error::Exception("Error: send!");
-
+		toSend(fd.fd, "001 " + client.nickname + " :Welcome to the " + server + " Network, " + client.nickname + "[!" + client.username + "@" + client.hostname + "]\r\n");
+		toSend(fd.fd, "002 " + client.nickname + " :Your host is " + server + ", running version 1.0\r\n");
+		toSend(fd.fd, "003 " + client.nickname + " :This server was created " + datetime + "\r\n");
+		toSend(fd.fd, "004 " + client.nickname + " :There are 1 users and 0 services on 1 servers (PENSER A MODIFIER)\r\n");
+		toSend(fd.fd, "005 " + client.nickname + " :The channels must begin with a '#'.\r\nNicklen = 30\r\n");
 		client.is_first = false;
 	}
 	return (client);

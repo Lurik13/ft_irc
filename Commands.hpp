@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:37:48 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/13 22:56:32 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/14 16:44:19 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,12 @@ std::string	getAllArgs(int begin, Parse parse);
 int			channelExists(std::vector<class Channel>& channels, std::string channelName);
 bool		isACorrectNickname(std::string name);
 bool		hasAGoodNickname(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels, std::string cmd);
+
 std::string	getMode(char mode, Channel channels, int fd);
 char	    isAValidMode(std::string str);
+std::string	signSorting(std::string str);
+std::string	checkRelevance(std::string str, struct pollfd& fd, Channel& channel);
+bool	    checkNumberOfParams(std::string str, Parse& parse, struct pollfd& fd, std::map<int, infoClient>& clients);
 
 void		pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels);
 void		nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels);
