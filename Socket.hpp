@@ -52,4 +52,5 @@ class Socket
 		void						launch(void);
 		void						acceptClient(void);
 		void						handle(void);
+		int							getServerFd(void);
 };

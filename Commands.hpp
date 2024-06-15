@@ -24,6 +24,7 @@ std::string	getAllArgs(int begin, Parse parse);
 int			channelExists(std::vector<class Channel>& channels, std::string channelName);
 bool		isACorrectNickname(std::string name);
 bool		hasAGoodNickname(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels, std::string cmd);
+bool        nicknameExists(std::map<int, infoClient>& clients, std::string targetName);
 
 std::string	getMode(char mode, Channel channels, int fd);
 char		isAValidMode(std::string str);

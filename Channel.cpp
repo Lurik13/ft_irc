@@ -116,6 +116,14 @@ bool	Channel::isEmpty(void)
 	return (false);
 }
 
+bool	Channel::clientIsOperator(int fd, std::map<int, infoClient>& clients)
+{
+	if (clients.find(fd) != clients.end() && clients[fd].mode == "@")
+		return (true);
+	return (false);
+}
+
+
 bool    isChannel(std::string str)
 {
 	if (str.size() < 2 || str.size() > 50)

@@ -240,3 +240,8 @@ void	Socket::handle(void)
 		}
 	}
 }
+
+int	Socket::getServerFd(void)
+{
+	return (this->_fds[0].fd);
+}

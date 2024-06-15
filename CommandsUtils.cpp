@@ -14,7 +14,7 @@
 
 void	toSend(int fd, std::string str)
 {
-	std::cout << MAGENTA << str << RESET << std::endl;
+	std::cout << MAGENTA << str << RESET << " " << std::endl;
 	if (send(fd, str.c_str(), str.size(), 0) < 0)
 		throw Error::Exception("Error: send!");
 }
@@ -66,4 +66,14 @@ bool	hasAGoodNickname(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 		return (0);
 	}
 	return (1);
+}
+
+bool	nicknameExists(std::map<int, infoClient>& clients, std::string targetName)
+{
+	for (std::map<int, infoClient>::iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if (it->second.nickname == targetName)
+			return (true);
+	}
+	return (false);
 }

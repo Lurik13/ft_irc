@@ -46,4 +46,5 @@ class Channel
 		bool						isEmpty(void);
 		bool						clientIsInChannel(int fd);
 		bool						clientIsInChannel(const std::map<int, infoClient>& clients, std::string nickname);
+		bool						clientIsOperator(int fd, std::map<int, infoClient>& clients);
 };
