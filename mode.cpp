@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 10:42:25 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/15 11:34:25 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/15 11:37:25 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,22 +167,21 @@ std::string	whichSign(std::string str, int c)
 bool	checkModeArgs(std::string str, Parse& parse, struct pollfd& fd, std::map<int, infoClient>& clients, Channel& channel)
 {
 	int argIndex = 2;
-	std::cout << RED << "parse.getArgs().at(argIndex) = " << parse.getArgs().at(argIndex);
 	for (int i = 1; str[i]; i++)
 	{
 		// if (str[i] == 'o' ou 'k')
 		// 	nbOfParamsNeeded++;
 		if (str[i] == 'l' && whichSign(str, i) == "+l")
 		{
-			for (int j = 0; parse.getArgs().at(argIndex).at(j); j++)
+			for (int j = 0; parse.getArgs().at(argIndex)[j]; j++)
 			{
-				if (j == 4)
+				if (j == 3)
 				{
 					toSend(fd.fd, ":ft_irc.com 696 " + clients[fd.fd].nickname + " " + channel.getName() + " l " + parse.getArgs().at(argIndex) + " :The channel limit can't exceed 999.\r\n");
 					return (EXIT_FAILURE);
 				}
 				// ALERTE ICI
-				if ((parse.getArgs().at(argIndex))[j] < '0' || (parse.getArgs().at(argIndex))[j] > '9')
+				if (parse.getArgs().at(argIndex)[j] < '0' || parse.getArgs().at(argIndex)[j] > '9')
 				{
 					toSend(fd.fd, ":ft_irc.com 696 " + clients[fd.fd].nickname + " " + channel.getName() + " l " + parse.getArgs().at(argIndex) + " :The channel limit must be a positive number.\r\n");
 					return (EXIT_FAILURE);
