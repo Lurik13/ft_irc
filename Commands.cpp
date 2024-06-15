@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/14 14:25:33 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/15 10:01:06 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,9 +156,9 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					// add client to the channel
 					channels[i].push(fd.fd, "");
 					std::string	listOfUsers;
-					for (std::map<int, clientData>::iterator it = channels[i].getClients().begin(); it != channels[i].getClients().end();)
+					for (std::map<int, std::string>::iterator it = channels[i].getClients().begin(); it != channels[i].getClients().end();)
 					{
-						listOfUsers += it->second.name + clients.find(it->first)->second.nickname;
+						listOfUsers += it->second + clients.find(it->first)->second.nickname;
 						if (it->first != fd.fd)
 							toSend(it->first, ":" + clients[fd.fd].nickname + "!~" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " JOIN " + channels[i].getName() + "\r\n");
 						++it;
@@ -227,7 +227,7 @@ void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
                     // FAIRE LE SYSTEME DE MODES
                     std::string reason = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "Goodbye";
                     // ENVOYER A TOUS LES AUTRES CLIENTS DU CHANNEL
-                    for (std::map<int, clientData>::iterator it = channels[j].getClients().begin(); it != channels[j].getClients().end(); ++it)
+                    for (std::map<int, std::string>::iterator it = channels[j].getClients().begin(); it != channels[j].getClients().end(); ++it)
                     {   
                         toSend(it->first, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PART " + channelNames[i] + " :" + reason + "\r\n");
                     }
@@ -269,7 +269,7 @@ void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCl
 				else
 				{
 					// A REVOIR
-					if (channels[i].getClients().find(fd.fd)->second.name != "@")
+					if (channels[i].getClients().find(fd.fd)->second != "@")
 						toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :You're not a channel operator\r\n");
 					else
 					{
@@ -312,7 +312,7 @@ void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, info
 					else
 					{
 						std::string	message = getAllArgs(1, parse);
-						for (std::map<int, clientData>::iterator it = channels[i].getClients().begin(); it != channels[i].getClients().end(); ++it)
+						for (std::map<int, std::string>::iterator it = channels[i].getClients().begin(); it != channels[i].getClients().end(); ++it)
 						{
 							if (it->first != fd.fd)
 								toSend(it->first, ":" + clients[fd.fd].nickname + " PRIVMSG " + targetName + " :" + message + "\r\n");
@@ -357,7 +357,7 @@ void	invite(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoC
 			else if (channels[i].clientIsInChannel(clients, nickname))
 				toSend(fd.fd, ":ft_irc.com 443 " + clients[fd.fd].nickname + " " + nickname + " " + channelName + " :is already on channel\r\n");
 			// if channel is in mode +i and if client is not an operator
-			else if (channels[i].getClients().find(fd.fd)->second.name != "@")
+			else if (channels[i].getClients().find(fd.fd)->second != "@")
 				toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channelName + " :You're not a channel operator\r\n");
 			// IF CHANNEL IS 
 			else

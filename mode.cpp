@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 10:42:25 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/14 20:03:22 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/15 10:14:30 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ std::string	getMode(char mode, Channel channel, int fd)
 	}
 	else if (mode == 't')
 	{
-		if (channel.getCanDefineTopic(fd) == 0)
+		if (channel.getCanDefineTopic() == 0)
 			return ("-t");
 		return ("+t");
 	}
@@ -35,7 +35,7 @@ std::string	getMode(char mode, Channel channel, int fd)
 	}
 	else if (mode == 'o')
 	{
-		if (channel.getCanGiveOp(fd) == 0)
+		if (channel.getClients()[fd] == "")
 			return ("-o");
 		return ("+o");
 	}
@@ -116,7 +116,7 @@ std::string removeSigns(std::string str)
 
 std::string	sortModes(std::string str, int fd, Channel& channel)
 {
-	std::string uselessOccurrences = "ikl";
+	std::string uselessOccurrences = "itkl";
 
 	for (int i = 0; uselessOccurrences[i]; i++)
 	{
@@ -133,7 +133,7 @@ bool	checkNumberOfParams(std::string str, Parse& parse, struct pollfd& fd, std::
 	size_t nbOfParamsNeeded = 0;
 	for (int i = 1; str[i]; i++)
 	{
-		if (str[i] == 't' || str[i] == 'o')
+		if (str[i] == 'o')
 			nbOfParamsNeeded++;
 		else if (str[i] == 'k' || str[i] == 'l')
 		{
@@ -153,7 +153,15 @@ bool	checkNumberOfParams(std::string str, Parse& parse, struct pollfd& fd, std::
 	return (EXIT_SUCCESS);
 }
 
-// void	executeModes(std::string str, Parse& parse, struct pollfd& fd, std::map<int, infoClient>& clients, Channel& channel)
+void	executeModes(std::string str, Parse& parse, struct pollfd& fd, std::map<int, infoClient>& clients, Channel& channel)
+{
+	(void)str;
+	(void)parse;
+	(void)fd;
+	(void)clients;
+	(void)channel;
+	// NE PAS OUBLIER DE PRECISER A CHAQUE CLIENT QU'ON A MODIFIE LES PERMISSIONS
+}
 
 // — i : Définir/supprimer le canal sur invitation uniquement
 // — t : Définir/supprimer les restrictions de la commande TOPIC pour les opérateurs de canaux
@@ -189,8 +197,7 @@ void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 						std::string sorted = sortModes(parse.getArgs().at(1), fd.fd, channels[i]);
 						std::cout << RED << "signSorted = " << sorted << RESET << std::endl;
 						if (checkNumberOfParams(sorted, parse, fd, clients) == EXIT_SUCCESS)
-							;
-							// executeModes(sorted, parse, fd, clients, channels[i]);
+							executeModes(sorted, parse, fd, clients, channels[i]);
 						break;
 					}
 					case SIGN_MISSING:

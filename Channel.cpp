@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:09 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/13 17:40:58 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/15 10:00:07 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,13 @@ Channel::Channel(void)
 Channel::Channel(int fd, std::string name, std::string key, std::string topic, std::string mode)
 {
 	_clients.clear();
-	_clients[fd].name = mode;
+	_clients[fd] = mode;
 	_name = name;
 	_key = key;
 	_topic = topic;
 	_nbMaxOfClients = 2147483647;
 	_isInviteOnly = 0;
-	_clients[fd].canDefineTopic = 1;
-	_clients[fd].canGiveOp = 1;
+	_canDefineTopic = 1;
 }
 
 Channel::~Channel(void)
@@ -35,12 +34,10 @@ Channel::~Channel(void)
 
 void    Channel::push(int fd, std::string mode)
 {
-	_clients[fd].name = mode;
-	_clients[fd].canDefineTopic = 0;
-	_clients[fd].canGiveOp = 0;
+	_clients[fd] = mode;
 }
 
-std::map<int, clientData>&	Channel::getClients(void)
+std::map<int, std::string>&	Channel::getClients(void)
 {
 	return (this->_clients);
 }
@@ -70,14 +67,9 @@ bool	Channel::getIsInviteOnly(void)
 	return (this->_isInviteOnly);
 }
 
-bool	Channel::getCanDefineTopic(int fd)
+bool	Channel::getCanDefineTopic(void)
 {
-	return (this->_clients[fd].canDefineTopic);
-}
-
-bool	Channel::getCanGiveOp(int fd)
-{
-	return (this->_clients[fd].canGiveOp);
+	return (this->_canDefineTopic);
 }
 
 Channel&	Channel::getChannel(void)
@@ -90,11 +82,6 @@ void	Channel::setTopic(std::string topic)
 	this->_topic = topic;
 }
 
-void	Channel::setCanGiveOp(int fd, bool op)
-{
-	this->_clients[fd].canGiveOp = op;
-}
-
 bool	Channel::clientIsInChannel(int fd)
 {
 	if (_clients.find(fd) == _clients.end())
@@ -104,7 +91,7 @@ bool	Channel::clientIsInChannel(int fd)
 
 bool	Channel::clientIsInChannel(const std::map<int, infoClient>& clients, std::string nickname)
 {
-	for (std::map<int, clientData>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	for (std::map<int, std::string>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
 		if (clients.find(it->first)->second.nickname == nickname)
 			return (true);
