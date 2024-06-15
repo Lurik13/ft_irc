@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:09 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/15 10:00:07 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/15 11:25:17 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,11 @@ Channel&	Channel::getChannel(void)
 void	Channel::setTopic(std::string topic)
 {
 	this->_topic = topic;
+}
+
+void	Channel::setLimit(int limit)
+{
+	this->_nbMaxOfClients = limit;
 }
 
 bool	Channel::clientIsInChannel(int fd)

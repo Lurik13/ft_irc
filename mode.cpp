@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 10:42:25 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/15 10:14:30 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/15 11:34:25 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,6 +153,47 @@ bool	checkNumberOfParams(std::string str, Parse& parse, struct pollfd& fd, std::
 	return (EXIT_SUCCESS);
 }
 
+std::string	whichSign(std::string str, int c)
+{
+	std::string result = "";
+	int sign = c;
+	while (str[sign] != '+' && str[sign] != '-')
+		sign--;
+	result += str[sign];
+	result += str[c];
+	return (result);
+}
+
+bool	checkModeArgs(std::string str, Parse& parse, struct pollfd& fd, std::map<int, infoClient>& clients, Channel& channel)
+{
+	int argIndex = 2;
+	std::cout << RED << "parse.getArgs().at(argIndex) = " << parse.getArgs().at(argIndex);
+	for (int i = 1; str[i]; i++)
+	{
+		// if (str[i] == 'o' ou 'k')
+		// 	nbOfParamsNeeded++;
+		if (str[i] == 'l' && whichSign(str, i) == "+l")
+		{
+			for (int j = 0; parse.getArgs().at(argIndex).at(j); j++)
+			{
+				if (j == 4)
+				{
+					toSend(fd.fd, ":ft_irc.com 696 " + clients[fd.fd].nickname + " " + channel.getName() + " l " + parse.getArgs().at(argIndex) + " :The channel limit can't exceed 999.\r\n");
+					return (EXIT_FAILURE);
+				}
+				// ALERTE ICI
+				if ((parse.getArgs().at(argIndex))[j] < '0' || (parse.getArgs().at(argIndex))[j] > '9')
+				{
+					toSend(fd.fd, ":ft_irc.com 696 " + clients[fd.fd].nickname + " " + channel.getName() + " l " + parse.getArgs().at(argIndex) + " :The channel limit must be a positive number.\r\n");
+					return (EXIT_FAILURE);
+				}
+			}
+			// channel.setLimit(std::atoi(parse.getArgs().at(argIndex).c_str()));
+		}
+	}
+	return (EXIT_SUCCESS);
+}
+
 void	executeModes(std::string str, Parse& parse, struct pollfd& fd, std::map<int, infoClient>& clients, Channel& channel)
 {
 	(void)str;
@@ -160,6 +201,11 @@ void	executeModes(std::string str, Parse& parse, struct pollfd& fd, std::map<int
 	(void)fd;
 	(void)clients;
 	(void)channel;
+
+	// for (int i = 1; str[i]; i++)
+	// {
+		
+	// }
 	// NE PAS OUBLIER DE PRECISER A CHAQUE CLIENT QU'ON A MODIFIE LES PERMISSIONS
 }
 
@@ -196,7 +242,7 @@ void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					{
 						std::string sorted = sortModes(parse.getArgs().at(1), fd.fd, channels[i]);
 						std::cout << RED << "signSorted = " << sorted << RESET << std::endl;
-						if (checkNumberOfParams(sorted, parse, fd, clients) == EXIT_SUCCESS)
+						if (sorted != "" && checkNumberOfParams(sorted, parse, fd, clients) == EXIT_SUCCESS && checkModeArgs(sorted, parse, fd, clients, channels[i]) == EXIT_SUCCESS)
 							executeModes(sorted, parse, fd, clients, channels[i]);
 						break;
 					}
