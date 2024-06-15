@@ -451,4 +451,3 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 //     — k : Définir/supprimer la clé du canal (mot de passe)
 //     — o : Donner/retirer le privilège de l’opérateur de canal
 //     — l : Définir/supprimer la limite d’utilisateurs pour le canal
-
