@@ -14,13 +14,12 @@
 
 void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	(void)clients;
 	(void)channels;
 	int error = 0;
 
 	if (parse.getArgs().size() < 1)
 	{
-		toSend(fd.fd, "Usage: /PASS <password>\r\n");
+		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " TOPIC :Not enough parameters\r\n");
 		error = 1;
 	}
 	
