@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 16:31:32 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 17:06:10 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -267,17 +267,20 @@ void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCl
 					toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :You're not on that channel\r\n");
 				else
 				{
-					// A REVOIR
-					if (channels[i].getClients().find(fd.fd)->second != "@")
-						toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :You're not a channel operator\r\n");
+					if (channels[i].clientIsOperator(fd.fd) == true)
+					{
+						channels[i].setTopic(getAllArgs(1, parse));
+						sendToTheChannel(fd.fd, 1, channels[i], ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
+					}
 					else
 					{
-						// FAIRE LE SYSTEME DE MODES
-						channels[i].setTopic(getAllArgs(1, parse));
-						// ENVOYER A TOUS LES AUTRES CLIENTS DU CHANNEL
-						for (std::map<int, infoClient>::iterator it = clients.begin(); it != clients.end(); ++it)
-						if (it->first != socket.getServerFd())
-							toSend(it->first, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
+						if (getMode('t', channels[i], fd.fd) == "+t")
+						{
+							channels[i].setTopic(getAllArgs(1, parse));
+							sendToTheChannel(fd.fd, 1, channels[i], ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
+						}
+						else
+							toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :You're not a channel operator\r\n");
 					}
 				}
 			}

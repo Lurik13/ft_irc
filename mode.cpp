@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 10:42:25 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 16:17:03 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 16:55:13 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,7 +297,7 @@ void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 			{
 				if (channels[i].clientIsOperator(fd.fd) == false)
 				{
-					toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :You're not channel operator\r\n");
+					toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :You're not a channel operator\r\n");
 					return ;
 				}
 				char isValid = isAValidMode(parse.getArgs().at(1));
