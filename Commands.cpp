@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 17:06:10 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 18:07:05 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,21 +215,14 @@ void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 			int	j = channelExists(channels, channelNames[i]);
 			if (j == -1)
 				toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + channelNames[i] + " :No such channel\r\n");
-			else if (channelNames[i][0] != '#')
-				toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + channelNames[i] + " :No such channel\r\n");
 			else
 			{
 				if (!channels[j].clientIsInChannel(fd.fd))
                     toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + channelNames[i] + " :You're not on that channel\r\n");
                 else
                 {
-                    // FAIRE LE SYSTEME DE MODES
                     std::string reason = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "Goodbye";
-                    // ENVOYER A TOUS LES AUTRES CLIENTS DU CHANNEL
-                    for (std::map<int, std::string>::iterator it = channels[j].getClients().begin(); it != channels[j].getClients().end(); ++it)
-                    {
-                        toSend(it->first, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PART " + channelNames[i] + " :" + reason + "\r\n");
-                    }
+					sendToTheChannel(fd.fd, 1, channels[i], ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PART " + channelNames[i] + " :" + reason + "\r\n");
                     channels[j].pop(fd.fd);
                     if (channels[j].isEmpty())
                         channels.erase(channels.begin() + j);
@@ -241,17 +234,10 @@ void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	// 6> TOPIC #yo :t
-	// 3< :zirconium.libera.chat 482 bonsoir #yo :You're not a channel operator
-	// 6> TOPIC #reg :wrgiuheg rieh erih re
-	// 3< :bonsoir!~lribette@81.255.67.28 TOPIC #reg :wrgiuheg rieh erih re
-
 	(void)socket;
 
 	if (parse.getArgs().size() == 0)
 		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " TOPIC :Not enough parameters\r\n");
-	else if (parse.getArgs().at(0)[0] != '#') // inutile ?
-		toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :No such channel\r\n");
 	else
 	{
 		int	i = channelExists(channels, parse.getArgs().at(0));
@@ -443,3 +429,21 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 //     — k : Définir/supprimer la clé du canal (mot de passe)
 //     — o : Donner/retirer le privilège de l’opérateur de canal
 //     — l : Définir/supprimer la limite d’utilisateurs pour le canal
+
+
+
+/*
+LES VERIFICATIONS DE LUCAS :
+PASS
+NICK
+USER
+QUIT
+PING
+JOIN
+PART ✅
+TOPIC ✅
+PRIVMSG ✅
+MODE
+INVITE
+KICK
+*/
