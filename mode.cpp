@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 10:42:25 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 15:03:13 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 16:03:02 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,10 +74,7 @@ std::string removeUselessOccurrences(std::string str, size_t i)
 	while (i != 0)
 	{
 		if (str[i] == c)
-		{
-			std::cout << "i = " << i << " has been removed" << std::endl;
 			str.erase(str.begin()+i);
-		}
 		i--;
 	}
 	return (str);
@@ -123,7 +120,6 @@ std::string	sortModes(std::string str, int fd, Channel& channel)
 		str = removeUselessOccurrences(str, str.find_last_of(uselessOccurrences[i]));
 		str = checkRelevance(str, str.find(uselessOccurrences[i]), fd, channel);
 	}
-	std::cout << CYAN << str << RESET << std::endl;
 	str = removeSigns(str);
 	return (str);
 }
@@ -149,7 +145,6 @@ bool	checkNumberOfParams(std::string str, Parse& parse, struct pollfd& fd, std::
 		else if (str[i] == 'l' && whichSign(str, i) == "+l")
 			nbOfParamsNeeded++;
 	}
-	std::cout << YELLOW << "nbOfParamsNeeded = " << nbOfParamsNeeded << " == " << parse.getArgs().size() - 2 << RESET << std::endl;
 	if (nbOfParamsNeeded != parse.getArgs().size() - 2)
 	{
 		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " MODE :Wrong number of parameters.\r\n");
@@ -235,8 +230,6 @@ void	executeModes(std::string str, Parse& parse, Socket& socket, struct pollfd& 
 		else if (str[i] == 'o')
 		{
 			bool isOperator = channel.clientIsOperator(socket.getClientFd(parse.getArgs().at(argIndex)));
-			std::cout << "fd = " << socket.getClientFd(parse.getArgs().at(argIndex)) << std::endl;
-			std::cout << "isOperator = " << isOperator << std::endl;
 			if (whichSign(str, i) == "-o")
 			{
 				if (isOperator == false)
@@ -258,7 +251,7 @@ void	executeModes(std::string str, Parse& parse, Socket& socket, struct pollfd& 
 					toSend(fd.fd, ":ft_irc.com 502 " + clients[fd.fd].nickname + " :User is an operator.\r\n");
 			}
 			argIndex++;
-		} // ERREUR SI ON VEUT SE MODIFIER SOI-MEME
+		}
 		
 		else if (str[i] == 'l')
 		{
@@ -314,7 +307,6 @@ void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					case EXIT_SUCCESS:
 					{
 						std::string sorted = sortModes(parse.getArgs().at(1), fd.fd, channels[i]);
-						std::cout << RED << "signSorted = " << sorted << RESET << std::endl;
 						if (sorted != "" && checkNumberOfParams(sorted, parse, fd, clients) == EXIT_SUCCESS)
 							if (checkModeArgs(sorted, parse, fd, clients, channels[i]) == EXIT_SUCCESS)
 								executeModes(sorted, parse, socket, fd, clients, channels[i]);
