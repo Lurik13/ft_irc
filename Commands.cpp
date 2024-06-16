@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 13:38:09 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 16:31:32 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,8 +287,6 @@ void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCl
 
 void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	(void)socket;
-
 	// :Alice!alice@192.168.1.10 PRIVMSG #example :Bonjour tout le monde !
 	if (parse.getArgs().size() <= 1)
 		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " TOPIC :Not enough parameters\r\n");
@@ -313,10 +311,7 @@ void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, info
 					else
 					{
 						std::string	message = getAllArgs(1, parse);
-						for (std::map<int, std::string>::iterator it = channels[i].getClients().begin(); it != channels[i].getClients().end(); ++it)
-						{
-							toSend(it->first, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PRIVMSG " + channels[i].getName() + " :" + message + "\r\n");
-						}
+						sendToTheChannel(fd.fd, 0, channels[i], ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PRIVMSG " + channels[i].getName() + " :" + message + "\r\n");
 					}
 				}
 			}
@@ -327,14 +322,8 @@ void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, info
 					toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + targetName + " :No such nick/channel\r\n");
 				else
 				{
-					for (std::map<int, infoClient>::iterator it = clients.begin(); it != clients.end(); ++it)
-					{
-						if (it->first != socket.getServerFd() && (it->second.nickname == targetName || it->second.nickname == clients[fd.fd].nickname))
-						{
-							std::string	message = getAllArgs(1, parse);
-							toSend(it->first, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PRIVMSG " + targetName + " :" + message + "\r\n");
-						}
-					}
+					std::string	message = getAllArgs(1, parse);
+					toSend(socket.getClientFd(targetName), ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PRIVMSG " + targetName + " :" + message + "\r\n");
 				}
 			}
 		}

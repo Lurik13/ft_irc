@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 11:40:11 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 13:42:59 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 16:15:51 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,13 @@ void	toSend(int fd, std::string str)
 	if (send(fd, str.c_str(), str.size(), 0) < 0)
 		throw Error::Exception("Error: send!");
 }
-void	sendToTheChannel(int fd, Channel channel, std::string str)
+void	sendToTheChannel(int fd, bool sendToMe, Channel channel, std::string str)
 {
-	std::cout << CYAN << fd << " sent " << str << RESET << std::endl;
-	send(fd, str.c_str(), str.size(), 0);
+	if (sendToMe == 1)
+	{
+		std::cout << CYAN << fd << " sent " << str << RESET << std::endl;
+		send(fd, str.c_str(), str.size(), 0);
+	}
 	for (std::map<int, std::string>::iterator it = channel.getClients().begin(); it != channel.getClients().end();)
 	{
 		if (it->first != fd)
@@ -74,7 +77,7 @@ bool	hasAGoodNickname(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 	(void)socket;
 	(void)channels;
 	
-	if (clients[fd.fd].has_a_good_nickname == 0 && (cmd == "JOIN" || cmd == "PART" || cmd == "TOPIC" || cmd == "PRIVMSG" || cmd == "MODE"))
+	if (clients[fd.fd].has_a_good_nickname == 0 && (cmd == "JOIN" || cmd == "PART" || cmd == "TOPIC" || cmd == "PRIVMSG" || cmd == "MODE" || cmd == "INVITE" || cmd == "KICK"))
 	{
 		toSend(fd.fd, ":ft_irc.com 431 " + clients[fd.fd].nickname + " :YOU HAVE TO CHANGE YOUR NICKNAME\r\n");
 		return (0);
