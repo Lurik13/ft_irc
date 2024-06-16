@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 10:42:25 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/15 11:37:25 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 11:02:51 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,9 +169,19 @@ bool	checkModeArgs(std::string str, Parse& parse, struct pollfd& fd, std::map<in
 	int argIndex = 2;
 	for (int i = 1; str[i]; i++)
 	{
-		// if (str[i] == 'o' ou 'k')
-		// 	nbOfParamsNeeded++;
-		if (str[i] == 'l' && whichSign(str, i) == "+l")
+		if (str[i] == 'k' && whichSign(str, i) == "+k")
+			argIndex++;
+		else if (str[i] == 'o')
+		{
+			if (channel.clientIsInChannel(clients, parse.getArgs().at(argIndex)) == 0)
+			{
+				toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + parse.getArgs().at(argIndex) + " :No such nick.\r\n");
+				return (EXIT_FAILURE);
+			}
+			argIndex++;
+		// bool						clientIsOperator(int fd, std::map<int, infoClient>& clients);
+		}
+		else if (str[i] == 'l' && whichSign(str, i) == "+l")
 		{
 			for (int j = 0; parse.getArgs().at(argIndex)[j]; j++)
 			{
@@ -180,13 +190,13 @@ bool	checkModeArgs(std::string str, Parse& parse, struct pollfd& fd, std::map<in
 					toSend(fd.fd, ":ft_irc.com 696 " + clients[fd.fd].nickname + " " + channel.getName() + " l " + parse.getArgs().at(argIndex) + " :The channel limit can't exceed 999.\r\n");
 					return (EXIT_FAILURE);
 				}
-				// ALERTE ICI
 				if (parse.getArgs().at(argIndex)[j] < '0' || parse.getArgs().at(argIndex)[j] > '9')
 				{
 					toSend(fd.fd, ":ft_irc.com 696 " + clients[fd.fd].nickname + " " + channel.getName() + " l " + parse.getArgs().at(argIndex) + " :The channel limit must be a positive number.\r\n");
 					return (EXIT_FAILURE);
 				}
 			}
+			argIndex++;
 			// channel.setLimit(std::atoi(parse.getArgs().at(argIndex).c_str()));
 		}
 	}
@@ -241,8 +251,9 @@ void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					{
 						std::string sorted = sortModes(parse.getArgs().at(1), fd.fd, channels[i]);
 						std::cout << RED << "signSorted = " << sorted << RESET << std::endl;
-						if (sorted != "" && checkNumberOfParams(sorted, parse, fd, clients) == EXIT_SUCCESS && checkModeArgs(sorted, parse, fd, clients, channels[i]) == EXIT_SUCCESS)
-							executeModes(sorted, parse, fd, clients, channels[i]);
+						if (sorted != "" && checkNumberOfParams(sorted, parse, fd, clients) == EXIT_SUCCESS)
+							if (checkModeArgs(sorted, parse, fd, clients, channels[i]) == EXIT_SUCCESS)
+								executeModes(sorted, parse, fd, clients, channels[i]);
 						break;
 					}
 					case SIGN_MISSING:
