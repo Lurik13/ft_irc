@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 11:40:11 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 16:15:51 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 18:26:27 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,7 @@
 void	toSend(int fd, std::string str)
 {
 	std::cout << MAGENTA << str << RESET << std::endl;
-	if (send(fd, str.c_str(), str.size(), 0) < 0)
-		throw Error::Exception("Error: send!");
+	send(fd, str.c_str(), str.size(), 0);
 }
 void	sendToTheChannel(int fd, bool sendToMe, Channel channel, std::string str)
 {

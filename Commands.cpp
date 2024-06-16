@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 18:07:05 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 18:40:37 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,19 +94,17 @@ void	quit(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	(void)parse;
 	(void)socket;
-	(void)clients;
 	(void)channels;
-	if (parse.getArgs().size() == 1 || parse.getArgs().size() == 2)
-	{
-		// std::string toSend = "PONG " + clients[fd.fd].servername + " :" + parse.getArgs().at(0) + "\r\n";
-		toSend(fd.fd, "PONG " + parse.getArgs().at(0) + "\r\n");
-	}
+	
+	if (parse.getArgs().size() != 1)
+		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " PONG :Not enough parameters\r\n");
+	else if (parse.getArgs().at(0).empty())
+		toSend(fd.fd, ":ft_irc.com 409 " + clients[fd.fd].nickname + " :No origin specified\r\n");
+	else if (parse.getArgs().at(0) != "ft_irc.com")
+		toSend(fd.fd, ":ft_irc.com 402 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :No such server\r\n");
 	else
-	{
-		toSend(fd.fd, "Usage: /PING <server>\r\n");
-	}
+		toSend(fd.fd, ":ft_irc.com PONG :ft_irc.com\r\n");
 }
 
 void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
@@ -434,11 +432,11 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 
 /*
 LES VERIFICATIONS DE LUCAS :
-PASS
+PASS ❌
 NICK
 USER
 QUIT
-PING
+PING ✅
 JOIN
 PART ✅
 TOPIC ✅
