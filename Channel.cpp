@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:09 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/15 11:25:17 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 13:37:12 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,9 +77,29 @@ Channel&	Channel::getChannel(void)
 	return (*this);
 }
 
+void	Channel::setIsInviteOnly(bool invite)
+{
+	this->_isInviteOnly = invite;
+}
+
+void	Channel::setCanDefineTopic(bool topic)
+{
+	this->_canDefineTopic = topic;
+}
+
 void	Channel::setTopic(std::string topic)
 {
 	this->_topic = topic;
+}
+
+void	Channel::setKey(std::string key)
+{
+	this->_key = key;
+}
+
+void	Channel::setOperator(int fd, std::string permission)
+{
+	this->_clients[fd] = permission;
 }
 
 void	Channel::setLimit(int limit)
@@ -116,10 +136,17 @@ bool	Channel::isEmpty(void)
 	return (false);
 }
 
-bool	Channel::clientIsOperator(int fd, std::map<int, infoClient>& clients)
+bool	Channel::clientIsOperator(int fd)
 {
-	if (clients.find(fd) != clients.end() && clients[fd].mode == "@")
-		return (true);
+	for (std::map<int, std::string>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (_clients.find(it->first)->first == fd)
+		{
+			if (_clients[fd] == "@")
+				return (true);
+			return (false);
+		}
+	}
 	return (false);
 }
 

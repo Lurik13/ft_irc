@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:05 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/15 11:25:03 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 13:37:49 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,18 @@ class Channel
 		bool						getIsInviteOnly(void);
 		bool						getCanDefineTopic(void);
 		Channel&					getChannel(void);
+		
+		void						setIsInviteOnly(bool invite);
+		void						setCanDefineTopic(bool topic);
 		void						setTopic(std::string topic);
+		void						setKey(std::string key);
+		void						setOperator(int fd, std::string permission);
 		void						setLimit(int limit);
+		
 		void						pop(int fd);
 		bool						isEmpty(void);
+		
 		bool						clientIsInChannel(int fd);
 		bool						clientIsInChannel(const std::map<int, infoClient>& clients, std::string nickname);
-		bool						clientIsOperator(int fd, std::map<int, infoClient>& clients);
+		bool						clientIsOperator(int fd);
 };

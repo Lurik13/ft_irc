@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 10:42:25 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 11:02:51 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 15:03:13 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,31 +128,6 @@ std::string	sortModes(std::string str, int fd, Channel& channel)
 	return (str);
 }
 
-bool	checkNumberOfParams(std::string str, Parse& parse, struct pollfd& fd, std::map<int, infoClient>& clients)
-{
-	size_t nbOfParamsNeeded = 0;
-	for (int i = 1; str[i]; i++)
-	{
-		if (str[i] == 'o')
-			nbOfParamsNeeded++;
-		else if (str[i] == 'k' || str[i] == 'l')
-		{
-			int j = i - 1;
-			while (str[j] != '+' && str[j] != '-')
-				j--;
-			if (str[j] == '+')
-				nbOfParamsNeeded++;
-		}
-	}
-	std::cout << YELLOW << "nbOfParamsNeeded = " << nbOfParamsNeeded << RESET << std::endl;
-	if (nbOfParamsNeeded != parse.getArgs().size() - 2)
-	{
-		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " MODE :Not enough parameters\r\n");
-		return (EXIT_FAILURE);
-	}
-	return (EXIT_SUCCESS);
-}
-
 std::string	whichSign(std::string str, int c)
 {
 	std::string result = "";
@@ -164,12 +139,31 @@ std::string	whichSign(std::string str, int c)
 	return (result);
 }
 
+bool	checkNumberOfParams(std::string str, Parse& parse, struct pollfd& fd, std::map<int, infoClient>& clients)
+{
+	size_t nbOfParamsNeeded = 0;
+	for (int i = 1; str[i]; i++)
+	{
+		if (str[i] == 'k' || str[i] == 'o')
+			nbOfParamsNeeded++;
+		else if (str[i] == 'l' && whichSign(str, i) == "+l")
+			nbOfParamsNeeded++;
+	}
+	std::cout << YELLOW << "nbOfParamsNeeded = " << nbOfParamsNeeded << " == " << parse.getArgs().size() - 2 << RESET << std::endl;
+	if (nbOfParamsNeeded != parse.getArgs().size() - 2)
+	{
+		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " MODE :Wrong number of parameters.\r\n");
+		return (EXIT_FAILURE);
+	}
+	return (EXIT_SUCCESS);
+}
+
 bool	checkModeArgs(std::string str, Parse& parse, struct pollfd& fd, std::map<int, infoClient>& clients, Channel& channel)
 {
 	int argIndex = 2;
 	for (int i = 1; str[i]; i++)
 	{
-		if (str[i] == 'k' && whichSign(str, i) == "+k")
+		if (str[i] == 'k')
 			argIndex++;
 		else if (str[i] == 'o')
 		{
@@ -179,7 +173,6 @@ bool	checkModeArgs(std::string str, Parse& parse, struct pollfd& fd, std::map<in
 				return (EXIT_FAILURE);
 			}
 			argIndex++;
-		// bool						clientIsOperator(int fd, std::map<int, infoClient>& clients);
 		}
 		else if (str[i] == 'l' && whichSign(str, i) == "+l")
 		{
@@ -197,25 +190,91 @@ bool	checkModeArgs(std::string str, Parse& parse, struct pollfd& fd, std::map<in
 				}
 			}
 			argIndex++;
-			// channel.setLimit(std::atoi(parse.getArgs().at(argIndex).c_str()));
 		}
 	}
 	return (EXIT_SUCCESS);
 }
 
-void	executeModes(std::string str, Parse& parse, struct pollfd& fd, std::map<int, infoClient>& clients, Channel& channel)
+void	executeModes(std::string str, Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, Channel& channel)
 {
-	(void)str;
-	(void)parse;
-	(void)fd;
-	(void)clients;
-	(void)channel;
-
-	// for (int i = 1; str[i]; i++)
-	// {
+	int argIndex = 2;
+	for (int i = 1; str[i]; i++)
+	{
+		if (str[i] == 'i')
+		{
+			channel.setIsInviteOnly(whichSign(str, i) == "+i");
+			sendToTheChannel(fd.fd, channel, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " MODE " + channel.getName() + " " + whichSign(str, i) + "\r\n");
+		}
 		
-	// }
-	// NE PAS OUBLIER DE PRECISER A CHAQUE CLIENT QU'ON A MODIFIE LES PERMISSIONS
+		else if (str[i] == 't')
+		{
+			channel.setCanDefineTopic(whichSign(str, i) == "+t");
+			sendToTheChannel(fd.fd, channel, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " MODE " + channel.getName() + " " + whichSign(str, i) + "\r\n");
+		}
+		
+		else if (str[i] == 'k')
+		{
+			if (whichSign(str, i) == "-k")
+			{
+				if (parse.getArgs().at(argIndex) != channel.getKey())
+					toSend(fd.fd, ":ft_irc.com 525 " + clients[fd.fd].nickname + " " + channel.getName() + " :Key is not well-formed.\r\n");
+				else
+				{
+					channel.setKey("");
+					sendToTheChannel(fd.fd, channel, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " MODE " + channel.getName() + " -k\r\n");
+				}
+			}
+			else
+			{
+				channel.setKey(parse.getArgs().at(argIndex));
+				sendToTheChannel(fd.fd, channel, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " MODE " + channel.getName() + " +k " + parse.getArgs().at(argIndex) + "\r\n");
+			}
+			argIndex++;
+		}
+		
+		else if (str[i] == 'o')
+		{
+			bool isOperator = channel.clientIsOperator(socket.getClientFd(parse.getArgs().at(argIndex)));
+			std::cout << "fd = " << socket.getClientFd(parse.getArgs().at(argIndex)) << std::endl;
+			std::cout << "isOperator = " << isOperator << std::endl;
+			if (whichSign(str, i) == "-o")
+			{
+				if (isOperator == false)
+					toSend(fd.fd, ":ft_irc.com 502 " + clients[fd.fd].nickname + " :User is not an operator.\r\n");
+				else
+				{
+					channel.setOperator(socket.getClientFd(parse.getArgs().at(argIndex)), "");
+					sendToTheChannel(fd.fd, channel, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " MODE " + channel.getName() + " -o " + parse.getArgs().at(argIndex) + "\r\n");
+				}
+			}
+			else
+			{
+				if (isOperator == false)
+				{
+					channel.setOperator(socket.getClientFd(parse.getArgs().at(argIndex)), "@");
+					sendToTheChannel(fd.fd, channel, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " MODE " + channel.getName() + " +o " + parse.getArgs().at(argIndex) + "\r\n");
+				}
+				else
+					toSend(fd.fd, ":ft_irc.com 502 " + clients[fd.fd].nickname + " :User is an operator.\r\n");
+			}
+			argIndex++;
+		} // ERREUR SI ON VEUT SE MODIFIER SOI-MEME
+		
+		else if (str[i] == 'l')
+		{
+			if (whichSign(str, i) == "-l")
+			{
+				channel.setLimit(2147483647);
+				sendToTheChannel(fd.fd, channel, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " MODE " + channel.getName() + " -l\r\n");
+			}
+			else
+			{
+				channel.setLimit(std::atoi(parse.getArgs().at(argIndex).c_str()));
+				sendToTheChannel(fd.fd, channel, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " MODE " + channel.getName() + " +l " + parse.getArgs().at(argIndex) + "\r\n");
+			}
+			argIndex++;
+		}
+	}
 }
 
 // — i : Définir/supprimer le canal sur invitation uniquement
@@ -225,7 +284,7 @@ void	executeModes(std::string str, Parse& parse, struct pollfd& fd, std::map<int
 // — l : Définir/supprimer la limite d’utilisateurs pour le canal
 void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	(void)socket;
+	// VERIFIER SI LA PERSONNE EST BIEN UN OPERATEUR
 	if (parse.getArgs().size() == 0)
 		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " MODE :Not enough parameters\r\n");
 	else
@@ -244,6 +303,11 @@ void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 			}
 			else if (parse.getArgs().size() > 1)
 			{
+				if (channels[i].clientIsOperator(fd.fd) == false)
+				{
+					toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :You're not channel operator\r\n");
+					return ;
+				}
 				char isValid = isAValidMode(parse.getArgs().at(1));
 				switch (isValid)
 				{
@@ -253,7 +317,7 @@ void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 						std::cout << RED << "signSorted = " << sorted << RESET << std::endl;
 						if (sorted != "" && checkNumberOfParams(sorted, parse, fd, clients) == EXIT_SUCCESS)
 							if (checkModeArgs(sorted, parse, fd, clients, channels[i]) == EXIT_SUCCESS)
-								executeModes(sorted, parse, fd, clients, channels[i]);
+								executeModes(sorted, parse, socket, fd, clients, channels[i]);
 						break;
 					}
 					case SIGN_MISSING:

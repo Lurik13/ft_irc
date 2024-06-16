@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/14 10:23:14 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 13:19:41 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,16 @@ bool operator==(const pollfd& lhs, const pollfd& rhs) {
 }
 
 std::string	Socket::getPassword() {return this->_password;}
+
+int	Socket::getClientFd(std::string nickname)
+{
+	for (std::map<int, infoClient>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (_clients.find(it->first)->second.nickname == nickname)
+			return (_clients.find(it->first)->first);
+	}
+	return (0);
+}
 
 void	Socket::ft_erase(struct pollfd& fd, std::vector<class Channel>& channels)
 {

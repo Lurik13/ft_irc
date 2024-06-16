@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 11:40:11 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/14 10:42:56 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 13:42:59 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,23 @@
 
 void	toSend(int fd, std::string str)
 {
-	std::cout << MAGENTA << str << RESET << " " << std::endl;
+	std::cout << MAGENTA << str << RESET << std::endl;
 	if (send(fd, str.c_str(), str.size(), 0) < 0)
 		throw Error::Exception("Error: send!");
+}
+void	sendToTheChannel(int fd, Channel channel, std::string str)
+{
+	std::cout << CYAN << fd << " sent " << str << RESET << std::endl;
+	send(fd, str.c_str(), str.size(), 0);
+	for (std::map<int, std::string>::iterator it = channel.getClients().begin(); it != channel.getClients().end();)
+	{
+		if (it->first != fd)
+		{
+			std::cout << GREEN << fd << " sent to " << it->first << " " << str << RESET << std::endl;
+			send(it->first, str.c_str(), str.size(), 0);
+		}
+		++it;
+	}
 }
 
 std::string getAllArgs(int begin, Parse parse)

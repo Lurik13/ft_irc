@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:37:48 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/15 11:27:58 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 13:01:34 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #define SIGN_MISSING 1
 
 void		toSend(int fd, std::string errToSend);
+void	    sendToTheChannel(int fd, Channel channel, std::string str);
 std::string	getAllArgs(int begin, Parse parse);
 int			channelExists(std::vector<class Channel>& channels, std::string channelName);
 bool		isACorrectNickname(std::string name);

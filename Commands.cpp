@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/15 10:01:06 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 13:38:09 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -360,7 +360,7 @@ void	invite(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoC
 			else if (channels[i].clientIsInChannel(clients, nickname))
 				toSend(fd.fd, ":ft_irc.com 443 " + clients[fd.fd].nickname + " " + nickname + " " + channelName + " :is already on channel\r\n");
 			// if channel is in mode +i and if client is not an operator
-			else if (!channels[i].clientIsOperator(fd.fd, clients))
+			else if (!channels[i].clientIsOperator(fd.fd))
 				toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channelName + " :You're not a channel operator\r\n");
 			else if (!nicknameExists(clients, nickname))
 				toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + nickname + " :No such nick/channel\r\n");
@@ -395,7 +395,7 @@ void	kick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		{
 			if (!channels[i].clientIsInChannel(fd.fd))
 				toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + channelName + " :You're not on that channel\r\n");
-			else if (!channels[i].clientIsOperator(fd.fd, clients))
+			else if (!channels[i].clientIsOperator(fd.fd))
 				toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channelName + " :You're not a channel operator\r\n");
 			else if (!channels[i].clientIsInChannel(clients, nickname))
 				toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + nickname + " :No such nick/channel\r\n");

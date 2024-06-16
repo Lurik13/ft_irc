@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:50:17 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/13 18:04:00 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/16 12:18:35 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class Socket
 		Socket(in_addr_t addr, in_port_t port, sa_family_t family, std::string password);
 		~Socket(void);
 		std::string					getPassword(void);
+		int							getClientFd(std::string nickname);
 		void						ft_erase(struct pollfd& fd, std::vector<class Channel>& channels);
 		void						launch(void);
 		void						acceptClient(void);
