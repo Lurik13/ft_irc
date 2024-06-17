@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/17 19:09:42 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/17 22:23:23 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -442,7 +442,7 @@ JOIN
 PART ✅
 TOPIC ✅
 PRIVMSG ✅
-MODE
-INVITE
+MODE ✅
+INVITE ✅
 KICK ✅
 */

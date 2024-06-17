@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 11:40:11 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/17 10:11:35 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/17 22:34:42 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,21 +15,21 @@
 void	toSend(int fd, std::string str)
 {
 	std::cout << MAGENTA << str << RESET << std::endl;
-	send(fd, str.c_str(), str.size(), 0);
+	send(fd, str.c_str(), str.size(), MSG_NOSIGNAL);
 }
 void	sendToTheChannel(int fd, bool sendToMe, Channel channel, std::string str)
 {
 	if (sendToMe == 1)
 	{
 		std::cout << CYAN << fd << " sent " << str << RESET << std::endl;
-		send(fd, str.c_str(), str.size(), 0);
+		send(fd, str.c_str(), str.size(), MSG_NOSIGNAL);
 	}
 	for (std::map<int, std::string>::iterator it = channel.getClients().begin(); it != channel.getClients().end();)
 	{
 		if (it->first != fd)
 		{
 			std::cout << GREEN << fd << " sent to " << it->first << " " << str << RESET << std::endl;
-			send(it->first, str.c_str(), str.size(), 0);
+			send(it->first, str.c_str(), str.size(), MSG_NOSIGNAL);
 		}
 		++it;
 	}
