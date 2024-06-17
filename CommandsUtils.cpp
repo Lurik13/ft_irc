@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 11:40:11 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 18:26:27 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/17 10:11:35 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,4 +92,9 @@ bool	nicknameExists(std::map<int, infoClient>& clients, std::string targetName)
 			return (true);
 	}
 	return (false);
+}
+
+std::string	getCompleteName(struct pollfd fd, std::map<int, infoClient> clients)
+{
+	return (":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname);
 }

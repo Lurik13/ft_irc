@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 18:40:37 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/17 10:15:08 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,12 +157,12 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 					{
 						listOfUsers += it->second + clients.find(it->first)->second.nickname;
 						if (it->first != fd.fd)
-							toSend(it->first, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " JOIN " + channels[i].getName() + "\r\n");
+							toSend(it->first, getCompleteName(fd, clients) + " JOIN " + channels[i].getName() + "\r\n");
 						++it;
 						if (it != channels[i].getClients().end())
 							listOfUsers += " ";
 					}
-					toSend(fd.fd, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " JOIN " + channels[i].getName() + "\r\n");
+					toSend(fd.fd, getCompleteName(fd, clients) + " JOIN " + channels[i].getName() + "\r\n");
 					// send RPL_TOPIC
 					toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
 					// send list of users in the channel (RPL_NAMREPLY)
@@ -185,7 +185,7 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 			// add channel to the list of channels
 			channels.push_back(c.getChannel());
 			// send RPL_TOPIC
-			toSend(fd.fd, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " JOIN " + c.getName() + "\r\n");
+			toSend(fd.fd, getCompleteName(fd, clients) + " JOIN " + c.getName() + "\r\n");
 			toSend(fd.fd, ":ft_irc.com 332 " + clients[fd.fd].nickname + " " + c.getName() + " :" + c.getTopic() + "\r\n");
 			// send list of users in the channel (RPL_NAMREPLY)
 			toSend(fd.fd, ":ft_irc.com 353 " + clients[fd.fd].nickname + " = " + c.getName() + " :@" + clients[fd.fd].nickname + "\r\n");
@@ -220,7 +220,7 @@ void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
                 else
                 {
                     std::string reason = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "Goodbye";
-					sendToTheChannel(fd.fd, 1, channels[i], ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PART " + channelNames[i] + " :" + reason + "\r\n");
+					sendToTheChannel(fd.fd, 1, channels[i], getCompleteName(fd, clients) + " PART " + channelNames[i] + " :" + reason + "\r\n");
                     channels[j].pop(fd.fd);
                     if (channels[j].isEmpty())
                         channels.erase(channels.begin() + j);
@@ -254,14 +254,14 @@ void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCl
 					if (channels[i].clientIsOperator(fd.fd) == true)
 					{
 						channels[i].setTopic(getAllArgs(1, parse));
-						sendToTheChannel(fd.fd, 1, channels[i], ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
+						sendToTheChannel(fd.fd, 1, channels[i], getCompleteName(fd, clients) + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
 					}
 					else
 					{
 						if (getMode('t', channels[i], fd.fd) == "+t")
 						{
 							channels[i].setTopic(getAllArgs(1, parse));
-							sendToTheChannel(fd.fd, 1, channels[i], ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
+							sendToTheChannel(fd.fd, 1, channels[i], getCompleteName(fd, clients) + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
 						}
 						else
 							toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :You're not a channel operator\r\n");
@@ -298,7 +298,7 @@ void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, info
 					else
 					{
 						std::string	message = getAllArgs(1, parse);
-						sendToTheChannel(fd.fd, 0, channels[i], ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PRIVMSG " + channels[i].getName() + " :" + message + "\r\n");
+						sendToTheChannel(fd.fd, 0, channels[i], getCompleteName(fd, clients) + " PRIVMSG " + channels[i].getName() + " :" + message + "\r\n");
 					}
 				}
 			}
@@ -310,7 +310,7 @@ void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, info
 				else
 				{
 					std::string	message = getAllArgs(1, parse);
-					toSend(socket.getClientFd(targetName), ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " PRIVMSG " + targetName + " :" + message + "\r\n");
+					toSend(socket.getClientFd(targetName), getCompleteName(fd, clients) + " PRIVMSG " + targetName + " :" + message + "\r\n");
 				}
 			}
 		}
@@ -346,7 +346,7 @@ void	invite(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoC
 				for (std::map<int, infoClient>::iterator it = clients.begin(); it != clients.end(); ++it)
 				{
 					if (it->first != socket.getServerFd() && (it->second.nickname == nickname || it->second.nickname == clients[fd.fd].nickname))
-						toSend(it->first, ":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname + " INVITE " + channels[i].getName() + "\r\n");
+						toSend(it->first, getCompleteName(fd, clients) + " INVITE " + channels[i].getName() + "\r\n");
 				}
 			}
 			toSend(fd.fd, ":ft_irc.com 341 " + clients[fd.fd].nickname + " " + nickname + " " + channelName + "\r\n");

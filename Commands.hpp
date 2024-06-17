@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:37:48 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 16:59:08 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/17 10:11:51 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ int			channelExists(std::vector<class Channel>& channels, std::string channelNam
 bool		isACorrectNickname(std::string name);
 bool		hasAGoodNickname(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels, std::string cmd);
 bool        nicknameExists(std::map<int, infoClient>& clients, std::string targetName);
+std::string	getCompleteName(struct pollfd fd, std::map<int, infoClient> clients);
 
 std::string	getMode(char mode, Channel channel, int fd);
 char		isAValidMode(std::string str);
