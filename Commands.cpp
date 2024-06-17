@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/17 10:15:08 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/17 17:38:18 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -356,15 +356,12 @@ void	invite(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoC
 
 void	kick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	(void)socket;
 	if (parse.getArgs().size() < 2)
 		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " KICK :Not enough parameters\r\n");
 	else
 	{
-		std::string		channelName = parse.getArgs().at(0);
-		std::string		nickname = parse.getArgs().at(1);
-		std::string		reason = parse.getArgs().size() == 3 ? parse.getArgs().at(2) : "Goodbye";
-		int				i = channelExists(channels, channelName);
+		std::string	channelName = parse.getArgs().at(0);
+		int	i = channelExists(channels, channelName);
 		if (i == -1)
 			toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + channelName + " :No such channel\r\n");
 		else
@@ -373,19 +370,25 @@ void	kick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 				toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + channelName + " :You're not on that channel\r\n");
 			else if (!channels[i].clientIsOperator(fd.fd))
 				toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channelName + " :You're not a channel operator\r\n");
-			else if (!channels[i].clientIsInChannel(clients, nickname))
-				toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + nickname + " :No such nick/channel\r\n");
-			else
+			
+			std::string			targetName = parse.getArgs().at(1);
+			std::stringstream	targetStream(targetName);
+			while (std::getline(targetStream, targetName, ','))
 			{
-				for (std::map<int, infoClient>::iterator it = clients.begin(); it != clients.end(); ++it)
+				if (!channels[i].clientIsInChannel(clients, targetName))
+					toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + targetName + " :No such nick\r\n");
+				else
 				{
-					if (it->first != socket.getServerFd())
-						toSend(it->first, ":ft_irc.com KICK " + channels[i].getName() + " " + nickname + " :" + reason + "\r\n");
-					if (it->second.nickname == nickname)
-						channels[i].pop(it->first);
+					std::string	reason = "";
+					if (parse.getArgs().size() == 2 || (parse.getArgs().size() == 3 && parse.getArgs().at(2) == ""))
+						reason = "Goodbye!";
+					else
+						reason = getAllArgs(2, parse);
+					sendToTheChannel(fd.fd, 1, channels[i], ":ft_irc.com KICK " + channels[i].getName() + " " + targetName + " :" + reason + "\r\n");
+					channels[i].pop(socket.getClientFd(targetName));
+					if (channels[i].isEmpty())
+						channels.erase(channels.begin() + i);
 				}
-                if (channels[i].isEmpty())
-                    channels.erase(channels.begin() + i);
 			}
 		}
 	}
@@ -443,5 +446,5 @@ TOPIC ✅
 PRIVMSG ✅
 MODE
 INVITE
-KICK
+KICK ✅
 */
