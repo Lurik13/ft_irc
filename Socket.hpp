@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:50:17 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 12:18:35 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/17 18:50:15 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ typedef struct infoClient
 	bool			is_first;
 	bool			has_a_good_nickname;
 	std::vector<std::string>	channels;
+	std::vector<std::string>	channelsInvitingMe;
 }				infoClient;
 
 class Socket

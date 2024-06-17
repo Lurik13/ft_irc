@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/17 17:38:18 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/17 19:09:42 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,7 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
+	// VERIFIER POUR LES INVITATIONS (channelsInvitingMe)
 	(void)socket;
 	std::string 						channelName = parse.getArgs().at(0);
 	std::string 						key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
@@ -319,7 +320,6 @@ void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, info
 
 void	invite(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	(void)socket;
 	if (parse.getArgs().size() != 2)
 		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " INVITE :Not enough parameters\r\n");
 	else
@@ -333,23 +333,21 @@ void	invite(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoC
 		{
 			if (!channels[i].clientIsInChannel(fd.fd))
 				toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + channelName + " :You're not on that channel\r\n");
+			else if (!nicknameExists(clients, nickname))
+				toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + nickname + " :No such nick\r\n");
+			else if (getMode('i', channels[i], fd.fd) == "+i" && !channels[i].clientIsOperator(fd.fd))
+				toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channelName + " :You're not a channel operator\r\n");
 			else if (channels[i].clientIsInChannel(clients, nickname))
 				toSend(fd.fd, ":ft_irc.com 443 " + clients[fd.fd].nickname + " " + nickname + " " + channelName + " :is already on channel\r\n");
-			// if channel is in mode +i and if client is not an operator
-			else if (!channels[i].clientIsOperator(fd.fd))
-				toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channelName + " :You're not a channel operator\r\n");
-			else if (!nicknameExists(clients, nickname))
-				toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + nickname + " :No such nick/channel\r\n");
-			// IF CHANNEL IS 
 			else
 			{
-				for (std::map<int, infoClient>::iterator it = clients.begin(); it != clients.end(); ++it)
-				{
-					if (it->first != socket.getServerFd() && (it->second.nickname == nickname || it->second.nickname == clients[fd.fd].nickname))
-						toSend(it->first, getCompleteName(fd, clients) + " INVITE " + channels[i].getName() + "\r\n");
-				}
+				toSend(fd.fd, ":ft_irc.com 341 " + clients[fd.fd].nickname + " " + nickname + " " + channelName + "\r\n");
+				toSend(socket.getClientFd(nickname), getCompleteName(fd, clients) + " INVITE " + nickname + " " + channelName + "\r\n");
+				for (size_t i = 0; i < clients[socket.getClientFd(nickname)].channelsInvitingMe.size(); i++)
+					if (clients[socket.getClientFd(nickname)].channelsInvitingMe.at(i) == channelName)
+						return ;
+				clients[socket.getClientFd(nickname)].channelsInvitingMe.push_back(channelName);
 			}
-			toSend(fd.fd, ":ft_irc.com 341 " + clients[fd.fd].nickname + " " + nickname + " " + channelName + "\r\n");
 		}
 	}
 }
