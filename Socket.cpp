@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 18:25:44 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 18:39:36 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,6 +147,7 @@ void	Socket::acceptClient(void)
 	this->_clients[fd.fd].mode = "@";
 	this->_clients[fd.fd].is_first = 1;
 	this->_clients[fd.fd].has_a_good_nickname = 0;
+	this->_clients[fd.fd].has_a_good_username = 0;
 	this->_clients[fd.fd].has_given_a_password = 0;
 	// this->_clients[fd.fd].channels = {};
 	std::cout << GREEN << fd.fd << " connected!" << RESET << std::endl;

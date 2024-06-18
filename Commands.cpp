@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 18:32:02 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 18:43:46 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,9 +67,11 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
 	(void)channels;
-	if (parse.getArgs().size() != 4)
+	if (clients[fd.fd].has_a_good_username == 1)
+		toSend(fd.fd, ":ft_irc.com 462 " + clients[fd.fd].nickname + " USER :You may not reregister\r\n");
+	else if (parse.getArgs().size() != 4)
 	{
-		toSend(fd.fd, "Usage: /USER <username> <hostname> <servername> <realname>\r\n");
+		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " USER :Not enough parameters\r\n(Parameters: <username> <hostname> <servername> <realname>)\r\n");
 		socket.ft_erase(fd, channels, "");
 	}
 	else
@@ -77,7 +79,8 @@ void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		clients[fd.fd].username = parse.getArgs().at(0);
 		clients[fd.fd].hostname = parse.getArgs().at(1);
 		clients[fd.fd].servername = parse.getArgs().at(2);
-		clients[fd.fd].realname = parse.getArgs().at(3);
+		clients[fd.fd].realname = parse.getAllArgs(3);
+		clients[fd.fd].has_a_good_username = 1;
 	}
 }
 
@@ -405,28 +408,3 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 	if (hasAGoodNickname(parse, socket, fd, clients, channels, cmdptr[i]))
 		(*fxptr[i])(parse, socket, fd, clients, channels);
 }
-
-// CAP - Négocier les capacités du client et du serveur
-// PASS - Définir le mot de passe du client ✅
-// NICK - Définir le pseudo du client ✅
-// USER - Définir le nom d’utilisateur du client
-// MODE - Changer le mode du client
-// WHOIS - Obtenir des informations sur un client
-// QUIT - Déconnecter le client ✅
-// PING - Vérifier la connexion du client ✅
-
-/*
-LES VERIFICATIONS DE LUCAS :
-PASS ✅
-NICK ✅
-USER 
-QUIT ✅
-PING ✅
-JOIN ✅
-PART ✅
-TOPIC ✅
-PRIVMSG ✅
-MODE ✅
-INVITE ✅
-KICK ✅
-*/
