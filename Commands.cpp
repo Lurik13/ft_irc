@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 18:46:57 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 22:29:12 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,7 +275,7 @@ void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, info
 {
 	// :Alice!alice@192.168.1.10 PRIVMSG #example :Bonjour tout le monde !
 	if (parse.getArgs().size() <= 1)
-		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " TOPIC :Not enough parameters\r\n");
+		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " PRIVMSG :Not enough parameters\r\n");
 	else
 	{
 		std::string			targetName = parse.getArgs().at(0);
