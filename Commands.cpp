@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 18:17:19 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 18:32:02 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,29 +14,32 @@
 
 void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	(void)channels;
 	int error = 0;
 
 	if (parse.getArgs().size() < 1)
 	{
-		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " TOPIC :Not enough parameters\r\n");
+		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " PASS :Not enough parameters\r\n");
 		error = 1;
 	}
-	
-	//On concatene tous les arguments au cas ou le serveur ait demande un mot de passe avec des espaces
-	std::string password = parse.getAllArgs(0);
-	if (password != socket.getPassword())
+	else
 	{
-		toSend(fd.fd, "Invalid password!\r\n");
-		error = 1;
+		std::string password = parse.getAllArgs(0);
+		if (clients[fd.fd].has_given_a_password == 1)
+			toSend(fd.fd, ":ft_irc.com 462 " + clients[fd.fd].nickname + " PASS :You may not reregister\r\n");
+		else if (password != socket.getPassword())
+		{
+			toSend(fd.fd, ":ft_irc.com 464 " + clients[fd.fd].nickname + " PASS :Password incorrect\r\n");
+			error = 1;
+		}
 	}
 	if (error == 1)
 		socket.ft_erase(fd, channels, "");
+	else
+		clients[fd.fd].has_given_a_password = 1;
 }
 
 void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	(void)channels;
 	(void)socket;
 	if (parse.getArgs().size() == 0)
 		toSend(fd.fd, ":ft_irc.com 431 NICK " + clients[fd.fd].nickname + " :No nickname given\r\n");
@@ -414,9 +417,9 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 
 /*
 LES VERIFICATIONS DE LUCAS :
-PASS ❌
-NICK
-USER
+PASS ✅
+NICK ✅
+USER 
 QUIT ✅
 PING ✅
 JOIN ✅
