@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 09:50:58 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 11:19:35 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,6 @@ void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	// VERIFIER POUR LES INVITATIONS (channelsInvitingMe)
 	(void)socket;
 	std::string 						channelName = parse.getArgs().at(0);
 	std::string 						key = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "";
@@ -119,7 +118,7 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 
 	if (parse.getArgs().size() == 0 || parse.getArgs().size() > 2)
 	{
-		toSend(fd.fd, "Usage: /JOIN <channel> {<key>}\r\n");
+		toSend(fd.fd, ":ft_irc.com 461 " + clients[fd.fd].nickname + " JOIN :Wrong number of parameters\r\n");
 		return ;
 	}
 	while (std::getline(nameStream, channelName, ','))
@@ -132,23 +131,19 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	for (std::map<std::string, std::string>::iterator it = ck.begin(); it != ck.end(); ++it)
 	{
 		std::cout << "Channel: " << it->first << " Key: " << it->second << std::endl;
-		// std::map<std::string, std::string>::iterator	channel = ck.find(it->first);
 		int	i = channelExists(channels, it->first);
 		if (i != -1)
 		{
 			std::cout << "Channel exists" << std::endl;
-			// if (channel is invite only)
-			if (channels[i].getIsInviteOnly())
-				toSend(fd.fd, ":ft_irc.com 473 " + clients[fd.fd].nickname + " " + channelName + " :Cannot join channel (+i)\r\n");
 			// if key is correct
-			else if (channels[i].getKey() == it->second || channels[i].getKey() == "")
+			if (channels[i].getKey() == it->second || channels[i].getKey() == "")
 			{
 				std::cout << "Key is correct" << std::endl;
 				// if client is already in the channel
 				if (channels[i].getClients().find(fd.fd) != channels[i].getClients().end())
 					toSend(fd.fd, "You are already in the channel\r\n");
 				// if client is not in the channel
-				else
+				else if (checkInvitesAndLimit(fd, clients, channels[i], it->first) == EXIT_SUCCESS)
 				{
 					std::cout << "You have joined the channel" << std::endl;
 					// add client to the channel
@@ -307,7 +302,7 @@ void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, info
 			{
 				std::cout << "This is a user" << std::endl;
 				if (!nicknameExists(clients, targetName))
-					toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + targetName + " :No such nick/channel\r\n");
+					toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + targetName + " :No such nick\r\n");
 				else
 				{
 					std::string	message = getAllArgs(1, parse);

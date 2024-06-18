@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:05 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 13:37:49 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 11:10:44 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class Channel
 		~Channel(void);
 		void						push(int fd, std::string mode);
 		std::map<int, std::string>&	getClients(void);
+		int							getClientsNumber(void);
 		std::string					getName(void);
 		std::string					getKey(void);
 		std::string					getTopic(void);

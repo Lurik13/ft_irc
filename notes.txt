@@ -58,3 +58,7 @@ server : Le nom du serveur qui envoie le message.
 @ : Secret
 <channel> : Le nom du canal dont on liste les utilisateurs.
 [ '@' / '+' ] <nick> : Les noms des utilisateurs avec des préfixes indiquant leur statut (opérateur @ ou voix +), suivis d'un espace entre chaque utilisateur.
+
+
+attention au RPL Welcome, il faut etre totalement connect
+getmode() -> class Channel

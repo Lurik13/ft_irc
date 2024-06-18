@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:09 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 13:37:12 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 11:11:29 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,11 @@ void    Channel::push(int fd, std::string mode)
 std::map<int, std::string>&	Channel::getClients(void)
 {
 	return (this->_clients);
+}
+
+int	Channel::getClientsNumber(void)
+{
+	return (this->_clients.size());
 }
 
 std::string Channel::getName(void)

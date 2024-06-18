@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 11:40:11 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/17 22:34:42 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 11:18:07 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,4 +97,34 @@ bool	nicknameExists(std::map<int, infoClient>& clients, std::string targetName)
 std::string	getCompleteName(struct pollfd fd, std::map<int, infoClient> clients)
 {
 	return (":" + clients[fd.fd].nickname + "!" + clients[fd.fd].username + "@" + clients[fd.fd].hostname);
+}
+
+bool	checkInvitesAndLimit(struct pollfd& fd, std::map<int, infoClient>& clients, Channel& channel, std::string channelName)
+{
+	if (channel.getIsInviteOnly())
+	{
+		bool inviteFound = false;
+		for (size_t invitesLen = 0; invitesLen < clients[fd.fd].channelsInvitingMe.size(); invitesLen++)
+		{
+			if (clients[fd.fd].channelsInvitingMe.at(invitesLen) == channelName)
+			{
+				clients[fd.fd].channelsInvitingMe.erase(clients[fd.fd].channelsInvitingMe.begin()+invitesLen);
+				inviteFound = true;
+			}
+		}
+		if (inviteFound == false)
+		{
+			toSend(fd.fd, ":ft_irc.com 473 " + clients[fd.fd].nickname + " " + channelName + " :Cannot join channel (+i)\r\n");
+			return (EXIT_FAILURE);
+		}
+	}
+	if (getMode('l', channel, fd.fd) == "+l")
+	{
+		if (channel.getClientsNumber() >= channel.getNbMaxOfClients())
+		{
+			toSend(fd.fd, ":ft_irc.com 471 " + clients[fd.fd].nickname + " " + channelName + " :Cannot join channel (+l)\r\n");
+			return (EXIT_FAILURE);
+		}
+	}
+	return (EXIT_SUCCESS);
 }
