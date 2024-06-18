@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 12:04:40 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 17:14:20 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,11 @@ bool operator==(const pollfd& lhs, const pollfd& rhs) {
 
 std::string	Socket::getPassword() {return this->_password;}
 
+int	Socket::getServerFd(void)
+{
+	return (this->_fds[0].fd);
+}
+
 int	Socket::getClientFd(std::string nickname)
 {
 	for (std::map<int, infoClient>::iterator it = _clients.begin(); it != _clients.end(); it++)
@@ -32,12 +37,12 @@ int	Socket::getClientFd(std::string nickname)
 
 void	Socket::ft_erase(struct pollfd& fd, std::vector<class Channel>& channels, std::string reason)
 {
-	std::string completeName = ":" + this->_clients[fd.fd].nickname + "!" + this->_clients[fd.fd].username + "@" + this->_clients[fd.fd].hostname;
+	std::string completeName = this->_clients[fd.fd].nickname + "!" + this->_clients[fd.fd].username + "@" + this->_clients[fd.fd].hostname;
 	for (std::vector<class Channel>::iterator it = channels.begin(); it != channels.end();)
 	{
 		if (it->clientIsInChannel(fd.fd))
 		{
-			sendToTheChannel(fd.fd, 0, *it, ":" + completeName + " PART " + it->getName()+ " :" + reason + "\r\n");
+			it->sendToTheChannel(fd.fd, 0, ":" + completeName + " PART " + it->getName()+ " :" + reason + "\r\n");
 			it->pop(fd.fd);
 		}
 		if (it->getClients().empty())
@@ -259,9 +264,4 @@ void	Socket::handle(void)
 			}
 		}
 	}
-}
-
-int	Socket::getServerFd(void)
-{
-	return (this->_fds[0].fd);
 }

@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 21:17:53 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/28 21:17:53 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 17:03:33 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class Parse
 		std::string					getHostname(void);
 		std::string					getCmd(void);
 		std::vector<std::string>	getArgs(void);
+		std::string 				getAllArgs(int begin);
 		Parse&						parse(std::string msg);
 };
 

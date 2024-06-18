@@ -60,5 +60,4 @@ server : Le nom du serveur qui envoie le message.
 [ '@' / '+' ] <nick> : Les noms des utilisateurs avec des préfixes indiquant leur statut (opérateur @ ou voix +), suivis d'un espace entre chaque utilisateur.
 
 
-attention au RPL Welcome, il faut etre totalement connect
-getmode() -> class Channel
+attention au RPL Welcome, il faut etre totalement connecte

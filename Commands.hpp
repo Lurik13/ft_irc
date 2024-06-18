@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:37:48 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 11:17:36 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 17:13:41 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,6 @@ void		which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<in
 
 /* CommandsUtils.cpp */
 void		toSend(int fd, std::string errToSend);
-void	    sendToTheChannel(int fd, bool sendToMe, Channel channel, std::string str);
-std::string	getAllArgs(int begin, Parse parse);
 int			channelExists(std::vector<class Channel>& channels, std::string channelName);
 bool		isACorrectNickname(std::string name);
 bool		hasAGoodNickname(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels, std::string cmd);
@@ -42,7 +40,6 @@ std::string	getCompleteName(struct pollfd fd, std::map<int, infoClient> clients)
 bool	    checkInvitesAndLimit(struct pollfd& fd, std::map<int, infoClient>& clients, Channel& channel, std::string channelName);
 
 /* mode.cpp */
-std::string	getMode(char mode, Channel channel, int fd);
 char		isAValidMode(std::string str);
 std::string	removeUselessOccurrences(std::string str, size_t i);
 std::string	checkRelevance(std::string str, size_t i, int fd, Channel& channel);

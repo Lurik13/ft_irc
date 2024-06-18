@@ -6,46 +6,11 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 10:42:25 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 09:49:47 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 17:10:44 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Commands.hpp"
-
-std::string	getMode(char mode, Channel channel, int fd)
-{
-	std::string result = "";
-	if (mode == 'i')
-	{
-		if (channel.getIsInviteOnly() == 0)
-			return ("-i");
-		return ("+i");
-	}
-	else if (mode == 't')
-	{
-		if (channel.getCanDefineTopic() == 0)
-			return ("-t");
-		return ("+t");
-	}
-	else if (mode == 'k')
-	{
-		if (channel.getKey() == "")
-			return ("-k");
-		return ("+k");
-	}
-	else if (mode == 'o')
-	{
-		if (channel.getClients()[fd] == "")
-			return ("-o");
-		return ("+o");
-	}
-	else //if (mode == 'l')
-	{
-		if (channel.getNbMaxOfClients() == 2147483647)
-			return ("-l");
-		return ("+l");
-	}
-}
 
 char	isAValidMode(std::string str)
 {
@@ -91,7 +56,7 @@ std::string	checkRelevance(std::string str, size_t i, int fd, Channel& channel)
 		j--;
 	temp += str[j];
 	temp += str[i];
-	if (temp != "+k" && temp != "+l" && getMode(str[i], channel, fd) == temp)
+	if (temp != "+k" && temp != "+l" && channel.getMode(str[i], fd) == temp)
 		str.erase(str.begin()+i);
 	return (str);
 }
@@ -198,13 +163,13 @@ void	executeModes(std::string str, Parse& parse, Socket& socket, struct pollfd& 
 		if (str[i] == 'i')
 		{
 			channel.setIsInviteOnly(whichSign(str, i) == "+i");
-			sendToTheChannel(fd.fd, 1, channel, getCompleteName(fd, clients) + " MODE " + channel.getName() + " " + whichSign(str, i) + "\r\n");
+			channel.sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " MODE " + channel.getName() + " " + whichSign(str, i) + "\r\n");
 		}
 		
 		else if (str[i] == 't')
 		{
 			channel.setCanDefineTopic(whichSign(str, i) == "+t");
-			sendToTheChannel(fd.fd, 1, channel, getCompleteName(fd, clients) + " MODE " + channel.getName() + " " + whichSign(str, i) + "\r\n");
+			channel.sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " MODE " + channel.getName() + " " + whichSign(str, i) + "\r\n");
 		}
 		
 		else if (str[i] == 'k')
@@ -216,13 +181,13 @@ void	executeModes(std::string str, Parse& parse, Socket& socket, struct pollfd& 
 				else
 				{
 					channel.setKey("");
-					sendToTheChannel(fd.fd, 1, channel, getCompleteName(fd, clients) + " MODE " + channel.getName() + " -k\r\n");
+					channel.sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " MODE " + channel.getName() + " -k\r\n");
 				}
 			}
 			else
 			{
 				channel.setKey(parse.getArgs().at(argIndex));
-				sendToTheChannel(fd.fd, 1, channel, getCompleteName(fd, clients) + " MODE " + channel.getName() + " +k " + parse.getArgs().at(argIndex) + "\r\n");
+				channel.sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " MODE " + channel.getName() + " +k " + parse.getArgs().at(argIndex) + "\r\n");
 			}
 			argIndex++;
 		}
@@ -237,7 +202,7 @@ void	executeModes(std::string str, Parse& parse, Socket& socket, struct pollfd& 
 				else
 				{
 					channel.setOperator(socket.getClientFd(parse.getArgs().at(argIndex)), "");
-					sendToTheChannel(fd.fd, 1, channel, getCompleteName(fd, clients) + " MODE " + channel.getName() + " -o " + parse.getArgs().at(argIndex) + "\r\n");
+					channel.sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " MODE " + channel.getName() + " -o " + parse.getArgs().at(argIndex) + "\r\n");
 				}
 			}
 			else
@@ -245,7 +210,7 @@ void	executeModes(std::string str, Parse& parse, Socket& socket, struct pollfd& 
 				if (isOperator == false)
 				{
 					channel.setOperator(socket.getClientFd(parse.getArgs().at(argIndex)), "@");
-					sendToTheChannel(fd.fd, 1, channel, getCompleteName(fd, clients) + " MODE " + channel.getName() + " +o " + parse.getArgs().at(argIndex) + "\r\n");
+					channel.sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " MODE " + channel.getName() + " +o " + parse.getArgs().at(argIndex) + "\r\n");
 				}
 				else
 					toSend(fd.fd, ":ft_irc.com 502 " + clients[fd.fd].nickname + " :User is an operator.\r\n");
@@ -258,12 +223,12 @@ void	executeModes(std::string str, Parse& parse, Socket& socket, struct pollfd& 
 			if (whichSign(str, i) == "-l")
 			{
 				channel.setLimit(2147483647);
-				sendToTheChannel(fd.fd, 1, channel, getCompleteName(fd, clients) + " MODE " + channel.getName() + " -l\r\n");
+				channel.sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " MODE " + channel.getName() + " -l\r\n");
 			}
 			else
 			{
 				channel.setLimit(std::atoi(parse.getArgs().at(argIndex).c_str()));
-				sendToTheChannel(fd.fd, 1, channel, getCompleteName(fd, clients) + " MODE " + channel.getName() + " +l " + parse.getArgs().at(argIndex) + "\r\n");
+				channel.sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " MODE " + channel.getName() + " +l " + parse.getArgs().at(argIndex) + "\r\n");
 			}
 			argIndex++;
 		}
@@ -292,7 +257,7 @@ void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		{
 			if (parse.getArgs().size() == 1)
 			{
-				std::string allModes = " " + getMode('i', channels[i], fd.fd) + getMode('t', channels[i], fd.fd) + getMode('k', channels[i], fd.fd) + getMode('o', channels[i], fd.fd) + getMode('l', channels[i], fd.fd);
+				std::string allModes = " " + channels[i].getMode('i', fd.fd) + channels[i].getMode('t', fd.fd) + channels[i].getMode('k', fd.fd) + channels[i].getMode('o', fd.fd) + channels[i].getMode('l', fd.fd);
 				toSend(fd.fd, getCompleteName(fd, clients) + " MODE " + channels[i].getName() + allModes + "\r\n");
 			}
 			else if (parse.getArgs().size() > 1)

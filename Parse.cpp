@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/28 21:17:04 by lribette          #+#    #+#             */
-/*   Updated: 2024/05/28 21:17:04 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 17:03:45 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,18 @@ std::string	Parse::getUsername(void) {return this->_username;}
 std::string	Parse::getHostname(void) {return this->_hostname;}
 std::string	Parse::getCmd(void) {return this->_cmd;}
 std::vector<std::string> Parse::getArgs(void) {return this->_args;}
+
+std::string Parse::getAllArgs(int begin)
+{
+	std::string result = "";
+	for (unsigned long i = begin; i < this->getArgs().size(); i++)
+	{
+		result += this->getArgs().at(i);
+		if (i + 1 < this->getArgs().size())
+			result += " ";
+	}
+	return (result);
+}
 
 std::string Parse::pcharToString(char *pchar)
 {

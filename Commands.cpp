@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 11:47:07 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 17:09:17 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 	
 	//On concatene tous les arguments au cas ou le serveur ait demande un mot de passe avec des espaces
-	std::string password = getAllArgs(0, parse);
+	std::string password = parse.getAllArgs(0);
 	if (password != socket.getPassword())
 	{
 		toSend(fd.fd, "Invalid password!\r\n");
@@ -82,16 +82,14 @@ void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	}
 }
 
-// ----------------- A CORRIGER -----------------
 void	quit(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
-	(void)parse;
 	(void)socket;
 	(void)clients;
 	(void)channels;
 	std::string reason = "";
 	if (parse.getArgs().size() > 0)
-		reason = getAllArgs(0, parse);
+		reason = parse.getAllArgs(0);
 	socket.ft_erase(fd, channels, reason);
 }
 
@@ -219,7 +217,7 @@ void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
                 else
                 {
                     std::string reason = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "Goodbye";
-					sendToTheChannel(fd.fd, 1, channels[i], getCompleteName(fd, clients) + " PART " + channelNames[i] + " :" + reason + "\r\n");
+					channels[i].sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " PART " + channelNames[i] + " :" + reason + "\r\n");
                     channels[j].pop(fd.fd);
                     if (channels[j].isEmpty())
                         channels.erase(channels.begin() + j);
@@ -252,15 +250,15 @@ void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCl
 				{
 					if (channels[i].clientIsOperator(fd.fd) == true)
 					{
-						channels[i].setTopic(getAllArgs(1, parse));
-						sendToTheChannel(fd.fd, 1, channels[i], getCompleteName(fd, clients) + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
+						channels[i].setTopic(parse.getAllArgs(1));
+						channels[i].sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
 					}
 					else
 					{
-						if (getMode('t', channels[i], fd.fd) == "+t")
+						if (channels[i].getMode('t', fd.fd) == "+t")
 						{
-							channels[i].setTopic(getAllArgs(1, parse));
-							sendToTheChannel(fd.fd, 1, channels[i], getCompleteName(fd, clients) + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
+							channels[i].setTopic(parse.getAllArgs(1));
+							channels[i].sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
 						}
 						else
 							toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :You're not a channel operator\r\n");
@@ -296,8 +294,8 @@ void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, info
 						toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + targetName + " :You're not on that channel\r\n");
 					else
 					{
-						std::string	message = getAllArgs(1, parse);
-						sendToTheChannel(fd.fd, 0, channels[i], getCompleteName(fd, clients) + " PRIVMSG " + channels[i].getName() + " :" + message + "\r\n");
+						std::string	message = parse.getAllArgs(1);
+						channels[i].sendToTheChannel(fd.fd, 0, getCompleteName(fd, clients) + " PRIVMSG " + channels[i].getName() + " :" + message + "\r\n");
 					}
 				}
 			}
@@ -308,7 +306,7 @@ void	privmsg(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, info
 					toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + targetName + " :No such nick\r\n");
 				else
 				{
-					std::string	message = getAllArgs(1, parse);
+					std::string	message = parse.getAllArgs(1);
 					toSend(socket.getClientFd(targetName), getCompleteName(fd, clients) + " PRIVMSG " + targetName + " :" + message + "\r\n");
 				}
 			}
@@ -333,7 +331,7 @@ void	invite(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoC
 				toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + channelName + " :You're not on that channel\r\n");
 			else if (!nicknameExists(clients, nickname))
 				toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + nickname + " :No such nick\r\n");
-			else if (getMode('i', channels[i], fd.fd) == "+i" && !channels[i].clientIsOperator(fd.fd))
+			else if (channels[i].getMode('i', fd.fd) == "+i" && !channels[i].clientIsOperator(fd.fd))
 				toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channelName + " :You're not a channel operator\r\n");
 			else if (channels[i].clientIsInChannel(clients, nickname))
 				toSend(fd.fd, ":ft_irc.com 443 " + clients[fd.fd].nickname + " " + nickname + " " + channelName + " :is already on channel\r\n");
@@ -380,8 +378,8 @@ void	kick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 						if (parse.getArgs().size() == 2 || (parse.getArgs().size() == 3 && parse.getArgs().at(2) == ""))
 							reason = "Goodbye!";
 						else
-							reason = getAllArgs(2, parse);
-						sendToTheChannel(fd.fd, 1, channels[i], ":ft_irc.com KICK " + channels[i].getName() + " " + targetName + " :" + reason + "\r\n");
+							reason = parse.getAllArgs(2);
+						channels[i].sendToTheChannel(fd.fd, 1, ":ft_irc.com KICK " + channels[i].getName() + " " + targetName + " :" + reason + "\r\n");
 						channels[i].pop(socket.getClientFd(targetName));
 						if (channels[i].isEmpty())
 							channels.erase(channels.begin() + i);

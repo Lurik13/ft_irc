@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 11:40:11 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 11:18:07 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 17:09:31 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,35 +16,6 @@ void	toSend(int fd, std::string str)
 {
 	std::cout << MAGENTA << str << RESET << std::endl;
 	send(fd, str.c_str(), str.size(), MSG_NOSIGNAL);
-}
-void	sendToTheChannel(int fd, bool sendToMe, Channel channel, std::string str)
-{
-	if (sendToMe == 1)
-	{
-		std::cout << CYAN << fd << " sent " << str << RESET << std::endl;
-		send(fd, str.c_str(), str.size(), MSG_NOSIGNAL);
-	}
-	for (std::map<int, std::string>::iterator it = channel.getClients().begin(); it != channel.getClients().end();)
-	{
-		if (it->first != fd)
-		{
-			std::cout << GREEN << fd << " sent to " << it->first << " " << str << RESET << std::endl;
-			send(it->first, str.c_str(), str.size(), MSG_NOSIGNAL);
-		}
-		++it;
-	}
-}
-
-std::string getAllArgs(int begin, Parse parse)
-{
-	std::string result = "";
-	for (unsigned long i = begin; i < parse.getArgs().size(); i++)
-	{
-		result += parse.getArgs().at(i);
-		if (i + 1 < parse.getArgs().size())
-			result += " ";
-	}
-	return (result);
 }
 
 int	channelExists(std::vector<class Channel>& channels, std::string channelName)
@@ -118,7 +89,7 @@ bool	checkInvitesAndLimit(struct pollfd& fd, std::map<int, infoClient>& clients,
 			return (EXIT_FAILURE);
 		}
 	}
-	if (getMode('l', channel, fd.fd) == "+l")
+	if (channel.getMode('l', fd.fd) == "+l")
 	{
 		if (channel.getClientsNumber() >= channel.getNbMaxOfClients())
 		{

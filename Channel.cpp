@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:09 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 11:11:29 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 17:08:50 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,24 @@ Channel::~Channel(void)
 void    Channel::push(int fd, std::string mode)
 {
 	_clients[fd] = mode;
+}
+
+void	Channel::sendToTheChannel(int fd, bool sendToMe, std::string str)
+{
+	if (sendToMe == 1)
+	{
+		std::cout << CYAN << fd << " sent " << str << RESET << std::endl;
+		send(fd, str.c_str(), str.size(), MSG_NOSIGNAL);
+	}
+	for (std::map<int, std::string>::iterator it = this->getClients().begin(); it != this->getClients().end();)
+	{
+		if (it->first != fd)
+		{
+			std::cout << GREEN << fd << " sent to " << it->first << " " << str << RESET << std::endl;
+			send(it->first, str.c_str(), str.size(), MSG_NOSIGNAL);
+		}
+		++it;
+	}
 }
 
 std::map<int, std::string>&	Channel::getClients(void)
@@ -80,6 +98,41 @@ bool	Channel::getCanDefineTopic(void)
 Channel&	Channel::getChannel(void)
 {
 	return (*this);
+}
+
+std::string	Channel::getMode(char mode, int fd)
+{
+	std::string result = "";
+	if (mode == 'i')
+	{
+		if (this->getIsInviteOnly() == 0)
+			return ("-i");
+		return ("+i");
+	}
+	else if (mode == 't')
+	{
+		if (this->getCanDefineTopic() == 0)
+			return ("-t");
+		return ("+t");
+	}
+	else if (mode == 'k')
+	{
+		if (this->getKey() == "")
+			return ("-k");
+		return ("+k");
+	}
+	else if (mode == 'o')
+	{
+		if (this->getClients()[fd] == "")
+			return ("-o");
+		return ("+o");
+	}
+	else //if (mode == 'l')
+	{
+		if (this->getNbMaxOfClients() == 2147483647)
+			return ("-l");
+		return ("+l");
+	}
 }
 
 void	Channel::setIsInviteOnly(bool invite)

@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/31 10:45:05 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 11:10:44 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 17:08:26 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ class Channel
 		Channel(int fd, std::string name, std::string key, std::string topic, std::string mode);
 		~Channel(void);
 		void						push(int fd, std::string mode);
+		void						sendToTheChannel(int fd, bool sendToMe, std::string str);
+		
 		std::map<int, std::string>&	getClients(void);
 		int							getClientsNumber(void);
 		std::string					getName(void);
@@ -41,6 +43,7 @@ class Channel
 		bool						getIsInviteOnly(void);
 		bool						getCanDefineTopic(void);
 		Channel&					getChannel(void);
+		std::string					getMode(char mode, int fd);
 		
 		void						setIsInviteOnly(bool invite);
 		void						setCanDefineTopic(bool topic);
