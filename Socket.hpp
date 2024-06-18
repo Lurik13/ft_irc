@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:50:17 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 18:39:22 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 22:04:56 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ class Socket
 		std::string					_password;
 		std::vector<class Channel>	_channels;
         Socket(void);
-		infoClient					registration(struct pollfd& fd, infoClient& client);
+		infoClient					registration(struct pollfd& fd, infoClient& client, int nbOfClients);
 		bool						readStdin(void);
 		std::string					readClientSocket(struct pollfd& fd);
 		void						parseClientInfos(std::string buffer, struct pollfd& fd);

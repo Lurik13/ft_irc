@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 18:53:20 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 22:11:32 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,10 +104,11 @@ Socket::~Socket(void)
 void    Socket::launch(void)
 {
 	std::cout << WHITE << "Launching the server..." << RESET << std::endl;
-	// bind the socket to the address and port
 	int opt = 1;
+	// allows the same port to be used without problem
 	if (setsockopt(this->_fds[0].fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 			throw Error::Exception("Error: setsockopt!");
+	// bind the socket to the address and port
 	int status = bind(this->_fds[0].fd, reinterpret_cast<struct sockaddr *>(&this->_ipv4), sizeof(this->_ipv4));
 	if (status)
 		throw Error::Exception("Error: bind!");
@@ -149,11 +150,10 @@ void	Socket::acceptClient(void)
 	this->_clients[fd.fd].has_a_good_nickname = 0;
 	this->_clients[fd.fd].has_a_good_username = 0;
 	this->_clients[fd.fd].has_given_a_password = 0;
-	// this->_clients[fd.fd].channels = {};
 	std::cout << GREEN << fd.fd << " connected!" << RESET << std::endl;
 }
 
-infoClient	Socket::registration(struct pollfd& fd, infoClient& client)
+infoClient	Socket::registration(struct pollfd& fd, infoClient& client, int nbOfClients)
 {
 	if (client.is_first == true)
 	{
@@ -162,12 +162,14 @@ infoClient	Socket::registration(struct pollfd& fd, infoClient& client)
 			std::string server = "ft_irc.com";
 			std::string version = "1.0";
 			std::string datetime = "2024/05/25 10:26:37";
+			std::stringstream numberOfClients;
+			numberOfClients << nbOfClients - 1;
 
 			toSend(fd.fd, ":" + server + " 001 " + client.nickname + " :Welcome to the " + server + " Network, " + client.nickname + "!" + client.username + "@" + client.hostname + "\r\n");
 			toSend(fd.fd, ":" + server + " 002 " + client.nickname + " :Your host is " + server + ", running version 1.0\r\n");
 			toSend(fd.fd, ":" + server + " 003 " + client.nickname + " :This server was created " + datetime + "\r\n");
-			toSend(fd.fd, ":" + server + " 004 " + client.nickname + " :There are 1 users and 0 services on 1 servers (PENSER A MODIFIER)\r\n");
-			toSend(fd.fd, ":" + server + " 005 " + client.nickname + " :The channels must begin with a '#'.\r\nNicklen = 30\r\n");
+			toSend(fd.fd, ":" + server + " 004 " + client.nickname + " :There are " + numberOfClients.str() + " users connected\r\n");
+			toSend(fd.fd, ":" + server + " 005 " + client.nickname + " :The channels must begin with a '#'\r\nNicklen = 30\r\n");
 			client.is_first = false;
 		}
 	}
@@ -265,7 +267,7 @@ void	Socket::handle(void)
 			{
 				std::string	buffer = this->readClientSocket(this->_fds[i]);
 				this->parseClientInfos(buffer, this->_fds[i]);
-				this->_clients[this->_fds[i].fd] = this->registration(this->_fds[i], this->_clients[this->_fds[i].fd]);
+				this->_clients[this->_fds[i].fd] = this->registration(this->_fds[i], this->_clients[this->_fds[i].fd], this->_clients.size());
 			}
 		}
 	}
