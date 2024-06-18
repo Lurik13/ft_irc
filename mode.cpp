@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 10:42:25 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 17:10:44 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 17:45:55 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,7 +198,7 @@ void	executeModes(std::string str, Parse& parse, Socket& socket, struct pollfd& 
 			if (whichSign(str, i) == "-o")
 			{
 				if (isOperator == false)
-					toSend(fd.fd, ":ft_irc.com 502 " + clients[fd.fd].nickname + " :User is not an operator.\r\n");
+					toSend(fd.fd, ":ft_irc.com 502 MODE " + clients[fd.fd].nickname + " :User is not an operator.\r\n");
 				else
 				{
 					channel.setOperator(socket.getClientFd(parse.getArgs().at(argIndex)), "");
@@ -213,7 +213,7 @@ void	executeModes(std::string str, Parse& parse, Socket& socket, struct pollfd& 
 					channel.sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " MODE " + channel.getName() + " +o " + parse.getArgs().at(argIndex) + "\r\n");
 				}
 				else
-					toSend(fd.fd, ":ft_irc.com 502 " + clients[fd.fd].nickname + " :User is an operator.\r\n");
+					toSend(fd.fd, ":ft_irc.com 502 MODE " + clients[fd.fd].nickname + " :User is an operator.\r\n");
 			}
 			argIndex++;
 		}

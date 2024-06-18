@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 17:09:17 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 18:17:19 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,21 +34,14 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		socket.ft_erase(fd, channels, "");
 }
 
-// for (Channel& channel : user.channels) {
-// 	for (User& channelUser : channel.users) {
-// 		if (channelUser != user) {
-// 			sendNotification(channelUser, oldNickname + " a changé son pseudo en " + newNickname);
-// 		}
-// 	}
-// }
 void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
 {
 	(void)channels;
 	(void)socket;
-	if (parse.getArgs().size() != 1)
-		toSend(fd.fd, "Usage: /NICK <nickname>\r\n");
-	else if (!isACorrectNickname(parse.getArgs().at(0)))
-		toSend(fd.fd, ":ft_irc.com 432 " + parse.getArgs().at(0) + " :Erroneus nickname\r\n");
+	if (parse.getArgs().size() == 0)
+		toSend(fd.fd, ":ft_irc.com 431 NICK " + clients[fd.fd].nickname + " :No nickname given\r\n");
+	else if (parse.getArgs().size() > 1 || !isACorrectNickname(parse.getArgs().at(0)))
+		toSend(fd.fd, ":ft_irc.com 432 NICK " + parse.getArgs().at(0) + " :Erroneus nickname\r\n");
 	else
 	{
 		for (std::map<int, infoClient>::iterator it = clients.begin(); it != clients.end(); ++it)
@@ -59,6 +52,9 @@ void	nick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 				return ;
 			}
 		}
+		for (size_t i = 0; i < channels.size(); i++)
+			if (channels[i].clientIsInChannel(clients, clients[fd.fd].nickname) == true)
+				channels[i].sendToTheChannel(fd.fd, 0, ":" + clients[fd.fd].nickname + " NICK " + parse.getArgs().at(0) + "\r\n");
 		toSend(fd.fd, ":" + clients[fd.fd].nickname + " NICK " + parse.getArgs().at(0) + "\r\n");
 		clients[fd.fd].nickname = parse.getArgs().at(0);
 		clients[fd.fd].has_a_good_nickname = 1;
