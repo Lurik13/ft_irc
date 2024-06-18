@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/16 18:32:18 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 12:04:40 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,17 +30,22 @@ int	Socket::getClientFd(std::string nickname)
 	return (0);
 }
 
-void	Socket::ft_erase(struct pollfd& fd, std::vector<class Channel>& channels)
+void	Socket::ft_erase(struct pollfd& fd, std::vector<class Channel>& channels, std::string reason)
 {
+	std::string completeName = ":" + this->_clients[fd.fd].nickname + "!" + this->_clients[fd.fd].username + "@" + this->_clients[fd.fd].hostname;
 	for (std::vector<class Channel>::iterator it = channels.begin(); it != channels.end();)
 	{
 		if (it->clientIsInChannel(fd.fd))
+		{
+			sendToTheChannel(fd.fd, 0, *it, ":" + completeName + " PART " + it->getName()+ " :" + reason + "\r\n");
 			it->pop(fd.fd);
+		}
 		if (it->getClients().empty())
 			it = channels.erase(it);
 		else
 			it++;
 	}
+	toSend(fd.fd, ":" + completeName + " QUIT :" + reason + "\r\n");
 	std::vector<struct pollfd>::iterator	it = std::find(this->_fds.begin(), this->_fds.end(), fd);
 	std::cout << BLUE << fd.fd << " disconnected!" << RESET << std::endl;
 	this->_clients.erase(fd.fd);
@@ -166,7 +171,12 @@ bool	Socket::readStdin(void)
 	memset(buffer, '\0', 65000);
 	read(0, buffer, sizeof(buffer));
 	if (strcmp(buffer, "exit\n") == 0)
+	{
+		for (std::map<int, infoClient>::iterator it = this->_clients.begin(); it != this->_clients.end(); ++it)
+			if (it->first != 0)
+				toSend(it->first, ":ft_irc.com QUIT : Server closed.\r\n");
 		return (false);
+	}
 	return (true);
 }
 
@@ -183,7 +193,7 @@ std::string	Socket::readClientSocket(struct pollfd& fd)
 		if (bytes != 0)
 			std::cout << RED << "Error: recv!" << std::endl;
 		// close the client file descriptor and remove it from the map and vector
-		ft_erase(fd, this->_channels);
+		ft_erase(fd, this->_channels, "");
 	}
 	else
 	{

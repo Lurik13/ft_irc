@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 11:19:35 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 11:47:07 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	pass(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		error = 1;
 	}
 	if (error == 1)
-		socket.ft_erase(fd, channels);
+		socket.ft_erase(fd, channels, "");
 }
 
 // for (Channel& channel : user.channels) {
@@ -71,7 +71,7 @@ void	user(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	if (parse.getArgs().size() != 4)
 	{
 		toSend(fd.fd, "Usage: /USER <username> <hostname> <servername> <realname>\r\n");
-		socket.ft_erase(fd, channels);
+		socket.ft_erase(fd, channels, "");
 	}
 	else
 	{
@@ -89,7 +89,10 @@ void	quit(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 	(void)socket;
 	(void)clients;
 	(void)channels;
-	socket.ft_erase(fd, channels);
+	std::string reason = "";
+	if (parse.getArgs().size() > 0)
+		reason = getAllArgs(0, parse);
+	socket.ft_erase(fd, channels, reason);
 }
 
 void	ping(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels)
@@ -420,9 +423,9 @@ LES VERIFICATIONS DE LUCAS :
 PASS ❌
 NICK
 USER
-QUIT
+QUIT ✅
 PING ✅
-JOIN
+JOIN ✅
 PART ✅
 TOPIC ✅
 PRIVMSG ✅
