@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 18:39:36 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 18:53:20 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,16 +157,19 @@ infoClient	Socket::registration(struct pollfd& fd, infoClient& client)
 {
 	if (client.is_first == true)
 	{
-		std::string server = "ft_irc.com";
-		std::string version = "1.0";
-		std::string datetime = "2024/05/25 10:26:37";
+		if (this->_clients[fd.fd].has_a_good_nickname == 1 && this->_clients[fd.fd].has_a_good_username == 1 && this->_clients[fd.fd].has_given_a_password == 1)
+		{
+			std::string server = "ft_irc.com";
+			std::string version = "1.0";
+			std::string datetime = "2024/05/25 10:26:37";
 
-		toSend(fd.fd, ":" + server + " 001 " + client.nickname + " :Welcome to the " + server + " Network, " + client.nickname + "!" + client.username + "@" + client.hostname + "\r\n");
-		toSend(fd.fd, ":" + server + " 002 " + client.nickname + " :Your host is " + server + ", running version 1.0\r\n");
-		toSend(fd.fd, ":" + server + " 003 " + client.nickname + " :This server was created " + datetime + "\r\n");
-		toSend(fd.fd, ":" + server + " 004 " + client.nickname + " :There are 1 users and 0 services on 1 servers (PENSER A MODIFIER)\r\n");
-		toSend(fd.fd, ":" + server + " 005 " + client.nickname + " :The channels must begin with a '#'.\r\nNicklen = 30\r\n");
-		client.is_first = false;
+			toSend(fd.fd, ":" + server + " 001 " + client.nickname + " :Welcome to the " + server + " Network, " + client.nickname + "!" + client.username + "@" + client.hostname + "\r\n");
+			toSend(fd.fd, ":" + server + " 002 " + client.nickname + " :Your host is " + server + ", running version 1.0\r\n");
+			toSend(fd.fd, ":" + server + " 003 " + client.nickname + " :This server was created " + datetime + "\r\n");
+			toSend(fd.fd, ":" + server + " 004 " + client.nickname + " :There are 1 users and 0 services on 1 servers (PENSER A MODIFIER)\r\n");
+			toSend(fd.fd, ":" + server + " 005 " + client.nickname + " :The channels must begin with a '#'.\r\nNicklen = 30\r\n");
+			client.is_first = false;
+		}
 	}
 	return (client);
 }

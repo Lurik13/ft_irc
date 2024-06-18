@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:37:48 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 17:13:41 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 18:46:51 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ void		which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<in
 void		toSend(int fd, std::string errToSend);
 int			channelExists(std::vector<class Channel>& channels, std::string channelName);
 bool		isACorrectNickname(std::string name);
-bool		hasAGoodNickname(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels, std::string cmd);
+bool		isRegistered(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels, std::string cmd);
 bool        nicknameExists(std::map<int, infoClient>& clients, std::string targetName);
 std::string	getCompleteName(struct pollfd fd, std::map<int, infoClient> clients);
 bool	    checkInvitesAndLimit(struct pollfd& fd, std::map<int, infoClient>& clients, Channel& channel, std::string channelName);

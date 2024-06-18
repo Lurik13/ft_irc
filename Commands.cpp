@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 18:43:46 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 18:46:57 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -405,6 +405,6 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 			return ;
 		// NE PAS OUBLIER DE REMETTRE EN PLACE CORRECTEMENT ICI
 	}
-	if (hasAGoodNickname(parse, socket, fd, clients, channels, cmdptr[i]))
+	if (isRegistered(parse, socket, fd, clients, channels, cmdptr[i]))
 		(*fxptr[i])(parse, socket, fd, clients, channels);
 }

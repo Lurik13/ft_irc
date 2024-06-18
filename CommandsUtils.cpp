@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 11:40:11 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 17:09:31 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 18:53:51 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,16 +41,18 @@ bool	isACorrectNickname(std::string name)
 	return (1);
 }
 
-bool	hasAGoodNickname(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels, std::string cmd)
+bool	isRegistered(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoClient>& clients, std::vector<class Channel>& channels, std::string cmd)
 {
 	(void)parse;
 	(void)socket;
 	(void)channels;
-	
-	if (clients[fd.fd].has_a_good_nickname == 0 && (cmd == "JOIN" || cmd == "PART" || cmd == "TOPIC" || cmd == "PRIVMSG" || cmd == "MODE" || cmd == "INVITE" || cmd == "KICK"))
+	if (clients[fd.fd].has_a_good_nickname == 0 || clients[fd.fd].has_a_good_username == 0 || clients[fd.fd].has_given_a_password == 0)
 	{
-		toSend(fd.fd, ":ft_irc.com 431 " + clients[fd.fd].nickname + " :YOU HAVE TO CHANGE YOUR NICKNAME\r\n");
-		return (0);
+		if (cmd == "JOIN" || cmd == "PART" || cmd == "TOPIC" || cmd == "PRIVMSG" || cmd == "MODE" || cmd == "INVITE" || cmd == "KICK")
+		{
+			toSend(fd.fd, ":ft_irc.com 431 " + clients[fd.fd].nickname + " :YOU HAVE TO REGISTER WITH A PASSWORD, A VALID NICKNAME AND SOME USER INFORMATIONS\r\n");
+			return (0);
+		}
 	}
 	return (1);
 }
