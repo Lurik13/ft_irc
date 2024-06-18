@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/17 22:23:23 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 09:50:58 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -368,24 +368,26 @@ void	kick(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 				toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + channelName + " :You're not on that channel\r\n");
 			else if (!channels[i].clientIsOperator(fd.fd))
 				toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channelName + " :You're not a channel operator\r\n");
-			
-			std::string			targetName = parse.getArgs().at(1);
-			std::stringstream	targetStream(targetName);
-			while (std::getline(targetStream, targetName, ','))
+			else
 			{
-				if (!channels[i].clientIsInChannel(clients, targetName))
-					toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + targetName + " :No such nick\r\n");
-				else
+				std::string			targetName = parse.getArgs().at(1);
+				std::stringstream	targetStream(targetName);
+				while (std::getline(targetStream, targetName, ','))
 				{
-					std::string	reason = "";
-					if (parse.getArgs().size() == 2 || (parse.getArgs().size() == 3 && parse.getArgs().at(2) == ""))
-						reason = "Goodbye!";
+					if (!channels[i].clientIsInChannel(clients, targetName))
+						toSend(fd.fd, ":ft_irc.com 401 " + clients[fd.fd].nickname + " " + targetName + " :No such nick\r\n");
 					else
-						reason = getAllArgs(2, parse);
-					sendToTheChannel(fd.fd, 1, channels[i], ":ft_irc.com KICK " + channels[i].getName() + " " + targetName + " :" + reason + "\r\n");
-					channels[i].pop(socket.getClientFd(targetName));
-					if (channels[i].isEmpty())
-						channels.erase(channels.begin() + i);
+					{
+						std::string	reason = "";
+						if (parse.getArgs().size() == 2 || (parse.getArgs().size() == 3 && parse.getArgs().at(2) == ""))
+							reason = "Goodbye!";
+						else
+							reason = getAllArgs(2, parse);
+						sendToTheChannel(fd.fd, 1, channels[i], ":ft_irc.com KICK " + channels[i].getName() + " " + targetName + " :" + reason + "\r\n");
+						channels[i].pop(socket.getClientFd(targetName));
+						if (channels[i].isEmpty())
+							channels.erase(channels.begin() + i);
+					}
 				}
 			}
 		}
@@ -403,12 +405,11 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 		i++;
 		if (i > 11)
 			return ;
+		// NE PAS OUBLIER DE REMETTRE EN PLACE CORRECTEMENT ICI
 	}
 	if (hasAGoodNickname(parse, socket, fd, clients, channels, cmdptr[i]))
 		(*fxptr[i])(parse, socket, fd, clients, channels);
 }
-
-// CAP, NICK, USER, QUIT, PING, WHOIS, PASS, JOIN, "WHO", "PART", "LUSERS", "MOTD", "PRIVMSG"
 
 // CAP - Négocier les capacités du client et du serveur
 // PASS - Définir le mot de passe du client ✅
@@ -418,18 +419,6 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 // WHOIS - Obtenir des informations sur un client
 // QUIT - Déconnecter le client ✅
 // PING - Vérifier la connexion du client ✅
-
-// KICK - Ejecter un client du channel
-// INVITE - Inviter un client au channel
-// TOPIC - Modifier ou afficher le thème du channel
-// MODE - Changer le mode du channel :
-//     — i : Définir/supprimer le canal sur invitation uniquement
-//     — t : Définir/supprimer les restrictions de la commande TOPIC pour les opé- rateurs de canaux
-//     — k : Définir/supprimer la clé du canal (mot de passe)
-//     — o : Donner/retirer le privilège de l’opérateur de canal
-//     — l : Définir/supprimer la limite d’utilisateurs pour le canal
-
-
 
 /*
 LES VERIFICATIONS DE LUCAS :

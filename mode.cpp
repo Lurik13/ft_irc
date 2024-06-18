@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/14 10:42:25 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/17 10:13:05 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/18 09:49:47 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,6 +286,8 @@ void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 		int	i = channelExists(channels, parse.getArgs().at(0));
 		if (i == -1)
 			toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :No such channel\r\n");
+		else if (!channels[i].clientIsInChannel(fd.fd))
+			toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :You're not on that channel\r\n");
 		else
 		{
 			if (parse.getArgs().size() == 1)
@@ -296,26 +298,26 @@ void	mode(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 			else if (parse.getArgs().size() > 1)
 			{
 				if (channels[i].clientIsOperator(fd.fd) == false)
-				{
 					toSend(fd.fd, ":ft_irc.com 482 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :You're not a channel operator\r\n");
-					return ;
-				}
-				char isValid = isAValidMode(parse.getArgs().at(1));
-				switch (isValid)
+				else
 				{
-					case EXIT_SUCCESS:
+					char isValid = isAValidMode(parse.getArgs().at(1));
+					switch (isValid)
 					{
-						std::string sorted = sortModes(parse.getArgs().at(1), fd.fd, channels[i]);
-						if (sorted != "" && checkNumberOfParams(sorted, parse, fd, clients) == EXIT_SUCCESS)
-							if (checkModeArgs(sorted, parse, fd, clients, channels[i]) == EXIT_SUCCESS)
-								executeModes(sorted, parse, socket, fd, clients, channels[i]);
-						break;
+						case EXIT_SUCCESS:
+						{
+							std::string sorted = sortModes(parse.getArgs().at(1), fd.fd, channels[i]);
+							if (sorted != "" && checkNumberOfParams(sorted, parse, fd, clients) == EXIT_SUCCESS)
+								if (checkModeArgs(sorted, parse, fd, clients, channels[i]) == EXIT_SUCCESS)
+									executeModes(sorted, parse, socket, fd, clients, channels[i]);
+							break;
+						}
+						case SIGN_MISSING:
+							toSend(fd.fd, ":ft_irc.com 472 " + clients[fd.fd].nickname + " :error with signs\r\n");
+							break;
+						default:
+							toSend(fd.fd, ":ft_irc.com 472 " + clients[fd.fd].nickname + " " + isValid + " :is unknown mode char to me\r\n");
 					}
-					case SIGN_MISSING:
-						toSend(fd.fd, ":ft_irc.com 472 " + clients[fd.fd].nickname + " :error with signs\r\n");
-						break;
-					default:
-						toSend(fd.fd, ":ft_irc.com 472 " + clients[fd.fd].nickname + " " + isValid + " :is unknown mode char to me\r\n");
 				}
 			}
 		}
