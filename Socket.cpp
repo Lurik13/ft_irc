@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 22:11:32 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/21 18:02:49 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,6 +140,7 @@ void	Socket::acceptClient(void)
 	char ip[INET_ADDRSTRLEN];
 	// inet_ntop converts the network address to a string
 	inet_ntop(AF_INET, &csin.sin_addr, ip, sizeof(ip));
+	this->_clients[fd.fd].currentCommand = "";
 	this->_clients[fd.fd].nickname = "Guest";
 	this->_clients[fd.fd].username = "Unknown";
 	this->_clients[fd.fd].servername = "ft_irc.com";
@@ -209,10 +210,19 @@ std::string	Socket::readClientSocket(struct pollfd& fd)
 	}
 	else
 	{
-		if (buffer[0] && strcmp(buffer, "\r\n"))
-			std::cout << fd.fd << ":\n" << buffer << std::endl;
+		std::string bufferString = this->_clients[fd.fd].currentCommand + buffer;
+		if (bufferString[bufferString.length() - 1] != '\n')
+		{
+			this->_clients[fd.fd].currentCommand = bufferString;
+			return ("");
+		}
+		else
+		{
+			this->_clients[fd.fd].currentCommand = "";
+			return (bufferString);
+		}
 	}
-	return (buffer);
+	return ("");
 }
 
 void	Socket::parseClientInfos(std::string buffer, struct pollfd& fd)
@@ -224,6 +234,8 @@ void	Socket::parseClientInfos(std::string buffer, struct pollfd& fd)
 	unsigned long int	start = 0;
 	unsigned long int	end = 0;
 
+	if (buffer[0] && strcmp(buffer.c_str(), "\r\n"))
+		std::cout << fd.fd << ":\n" << buffer << std::endl;
 	while (end != std::string::npos)
 	{
 		end = lines.find("\r\n", start);
