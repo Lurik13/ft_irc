@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/18 22:29:12 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/24 10:58:17 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,6 +176,8 @@ void	join(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
 				toSend(fd.fd, ":ft_irc.com 475 " + clients[fd.fd].nickname + " " + channels[i].getName() + " :" + "Cannot join channel (+k)\r\n");
 			}
 		}
+		else if (parse.getArgs().at(0)[0] && parse.getArgs().at(0)[0] != '#')
+			toSend(fd.fd, ":ft_irc.com 403 " + clients[fd.fd].nickname + " " + parse.getArgs().at(0) + " :No such channel\r\n");
 		else
 		{
 			std::cout << "Channel does not exist" << std::endl;
@@ -257,7 +259,7 @@ void	topic(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCl
 					}
 					else
 					{
-						if (channels[i].getMode('t', fd.fd) == "+t")
+						if (channels[i].getMode('t', fd.fd) == "-t")
 						{
 							channels[i].setTopic(parse.getAllArgs(1));
 							channels[i].sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " TOPIC " + channels[i].getName() + " :" + channels[i].getTopic() + "\r\n");
@@ -400,10 +402,9 @@ void    which_command(Parse& parse, Socket& socket, struct pollfd& fd, std::map<
 
 	while (parse.getCmd() != cmdptr[i])
 	{
-		i++;
-		if (i > 11)
+		if (i > 12)
 			return ;
-		// NE PAS OUBLIER DE REMETTRE EN PLACE CORRECTEMENT ICI
+		i++;
 	}
 	if (isRegistered(parse, socket, fd, clients, channels, cmdptr[i]))
 		(*fxptr[i])(parse, socket, fd, clients, channels);
