@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/29 11:31:56 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/24 10:58:17 by lribette         ###   ########.fr       */
+/*   Updated: 2024/06/24 16:55:17 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,8 +220,9 @@ void	part(Parse& parse, Socket& socket, struct pollfd& fd, std::map<int, infoCli
                     toSend(fd.fd, ":ft_irc.com 442 " + clients[fd.fd].nickname + " " + channelNames[i] + " :You're not on that channel\r\n");
                 else
                 {
+					
                     std::string reason = parse.getArgs().size() == 2 ? parse.getArgs().at(1) : "Goodbye";
-					channels[i].sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " PART " + channelNames[i] + " :" + reason + "\r\n");
+					channels[j].sendToTheChannel(fd.fd, 1, getCompleteName(fd, clients) + " PART " + channelNames[i] + " :" + reason + "\r\n");
                     channels[j].pop(fd.fd);
                     if (channels[j].isEmpty())
                         channels.erase(channels.begin() + j);
