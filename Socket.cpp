@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/06/21 18:02:49 by lribette         ###   ########.fr       */
+/*   Updated: 2024/07/18 10:54:54 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,6 +211,8 @@ std::string	Socket::readClientSocket(struct pollfd& fd)
 	else
 	{
 		std::string bufferString = this->_clients[fd.fd].currentCommand + buffer;
+		// std::cout << "currentCommand = " << this->_clients[fd.fd].currentCommand
+		// << ", buffer = " << buffer << std::endl;
 		if (bufferString[bufferString.length() - 1] != '\n')
 		{
 			this->_clients[fd.fd].currentCommand = bufferString;
