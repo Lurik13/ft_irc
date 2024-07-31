@@ -6,7 +6,7 @@
 /*   By: lribette <lribette@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/16 14:51:40 by lribette          #+#    #+#             */
-/*   Updated: 2024/07/18 10:54:54 by lribette         ###   ########.fr       */
+/*   Updated: 2024/07/31 17:17:57 by lribette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ infoClient	Socket::registration(struct pollfd& fd, infoClient& client, int nbOfC
 		{
 			std::string server = "ft_irc.com";
 			std::string version = "1.0";
-			std::string datetime = "2024/05/25 10:26:37";
+			std::string datetime = "2024/05/15 10:26:37";
 			std::stringstream numberOfClients;
 			numberOfClients << nbOfClients - 1;
 
@@ -211,8 +211,6 @@ std::string	Socket::readClientSocket(struct pollfd& fd)
 	else
 	{
 		std::string bufferString = this->_clients[fd.fd].currentCommand + buffer;
-		// std::cout << "currentCommand = " << this->_clients[fd.fd].currentCommand
-		// << ", buffer = " << buffer << std::endl;
 		if (bufferString[bufferString.length() - 1] != '\n')
 		{
 			this->_clients[fd.fd].currentCommand = bufferString;
