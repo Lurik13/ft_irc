@@ -81,7 +81,7 @@ Socket::Socket(in_addr_t addr, in_port_t port, sa_family_t family, std::string p
 	}
 	this->_fds.push_back(fd);
 	infoClient	infoClient;
-	memset(&infoClient, 0, sizeof(infoClient));
+	// memset(&infoClient, 0, sizeof(infoClient));
 	this->_clients[fd.fd] = infoClient;
 	this->_clients[fd.fd].ipv4 = this->_ipv4;
 	// ---- ( TEMPORAIRE ) fd2 : stdin ----
@@ -134,7 +134,7 @@ void	Socket::acceptClient(void)
 		throw Error::Exception("Error: cannot to connect the client!");
 	this->_fds.push_back(fd);
 	infoClient	infoClient;
-	memset(&infoClient, 0, sizeof(infoClient));
+	// memset(&infoClient, 0, sizeof(infoClient));
 	this->_clients[fd.fd] = infoClient;
 	this->_clients[fd.fd].ipv4 = csin;
 	char ip[INET_ADDRSTRLEN];
